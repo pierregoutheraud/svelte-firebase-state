@@ -1,4 +1,4 @@
-import { NodeState } from "$lib/realtime.svelte.js";
+import { NodeState } from "$lib/NodeState.svelte.js";
 import { rdb } from "../firebase.js";
 
 export interface RealtimeUser {

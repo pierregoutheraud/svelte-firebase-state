@@ -1,4 +1,5 @@
 import { CollectionState } from "$lib/index.js";
+import { collection, query } from "firebase/firestore";
 import { firestore } from "../firebase.js";
 
 export interface FirestoreUser {
@@ -9,5 +10,8 @@ export interface FirestoreUser {
 export const firestoreUsersState = new CollectionState<FirestoreUser>({
 	firestore,
 	listen: true,
-	path: "users"
+	// path: "users",
+	query: async () => {
+		return query(collection(firestore, "users"));
+	}
 });

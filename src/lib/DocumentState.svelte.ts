@@ -45,6 +45,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 	private docRef: DocumentReference | undefined;
 	private unsub: Unsubscribe | undefined;
 	private loading = $state(false);
+	private queryRef: Query | undefined;
 
 	private readonly auth?: Auth;
 	private readonly firestore: Firestore;
@@ -85,7 +86,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 		}
 	}
 
-	private async getQueryRef(): Promise<typeof this.docRef | undefined> {
+	private async get_doc_ref(): Promise<typeof this.docRef | undefined> {
 		if (this.docRef) {
 			return this.docRef;
 		}
@@ -120,6 +121,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 				return this.docRef;
 			}
 
+			this.queryRef = queryRef;
 			const querySnapshot = await getDocs(queryRef);
 			this.docRef = querySnapshot.docs[0]?.ref;
 		}
@@ -130,7 +132,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 	private async fetch_data(): Promise<void> {
 		this.loading = true;
 
-		const docRef = await this.getQueryRef();
+		const docRef = await this.get_doc_ref();
 		if (!docRef) {
 			this.value = null;
 			return;
@@ -147,28 +149,61 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 		this.loading = false;
 	}
 
-	private async listen(
-		callback?: (d: T | null) => void
-	): Promise<Unsubscribe | undefined> {
+	private async listen(): Promise<Unsubscribe | undefined> {
 		if (this.unsub) {
 			return;
 		}
 
-		const docRef = await this.getQueryRef();
-		if (!docRef) {
+		await this.get_doc_ref();
+
+		if (!this.docRef) {
+			// If there is no docRef, we can still try to listen to the queryRef
+			this.listen_to_query();
 			return;
 		}
 
-		this.unsub = onSnapshot(docRef, (docSnap) => {
-			if (!docSnap.exists()) {
-				callback?.(null);
+		this.listen_to_doc();
+	}
+
+	listen_to_query() {
+		if (!this.queryRef) {
+			return;
+		}
+
+		this.unsub?.();
+		this.unsub = onSnapshot(this.queryRef, (querySnapshot) => {
+			if (!querySnapshot.empty) {
+				// We found a document
+				const docSnap = querySnapshot.docs[0];
+				this.docRef = docSnap.ref;
+				this.unsub?.();
+				this.listen_to_doc();
+			} else {
 				this.value = null;
+			}
+		});
+
+		return this.unsub;
+	}
+
+	listen_to_doc() {
+		if (!this.docRef) {
+			return;
+		}
+
+		this.unsub?.();
+		this.unsub = onSnapshot(this.docRef, (docSnap) => {
+			if (!docSnap.exists()) {
+				this.value = null;
+				// If the document doesn't exist
+				// We can still try to listen to the queryRef
+				this.listen_to_query();
 				return;
 			}
 			const newData = docSnap.data() as T;
 			this.value = newData;
-			callback?.(this.value);
 		});
+
 		return this.unsub;
 	}
 
@@ -191,7 +226,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 		return this.value;
 	}
 
-	set data(data: T | undefined) {
+	set data(data: T | null | undefined) {
 		this.value = data;
 	}
 

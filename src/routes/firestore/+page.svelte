@@ -6,7 +6,7 @@
 
 	const user = new DocumentState<FirestoreUser>({
 		firestore,
-		// listen: true,
+		listen: true,
 		// path: "users/rXY7P670aVJiqrrsyw8z"
 		query: (u) => {
 			if (u) {
@@ -19,7 +19,7 @@
 			);
 		}
 	});
-	// $inspect(user.data);
+	$inspect(user.data);
 
 	let name = $state("John");
 	let age = $state(0);
@@ -41,13 +41,13 @@
 </script>
 
 <main>
-	<div>
-		{#if firestoreUsersState.data}
-			{#each firestoreUsersState.data as user}
-				<div>{user.name} - {user.age}</div>
-			{/each}
-		{/if}
-	</div>
+	<!-- <div> -->
+	<!-- 	{#if firestoreUsersState.data} -->
+	<!-- 		{#each firestoreUsersState.data as user} -->
+	<!-- 			<div>{user.name} - {user.age}</div> -->
+	<!-- 		{/each} -->
+	<!-- 	{/if} -->
+	<!-- </div> -->
 
 	<!-- <div> -->
 	<!-- 	<input type="text" bind:value={name} /> -->

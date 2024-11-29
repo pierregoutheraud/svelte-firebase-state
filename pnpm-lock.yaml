@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       firebase:
-        specifier: 11.0.2
+        specifier: '>=10'
         version: 11.0.2
     devDependencies:
       '@sveltejs/adapter-auto':

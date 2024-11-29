@@ -8,7 +8,8 @@ import {
 	doc,
 	getDoc,
 	DocumentReference,
-	setDoc
+	setDoc,
+	getDocs
 } from "firebase/firestore";
 import { type Auth } from "firebase/auth";
 import { get_firebase_user_promise } from "./utils.svelte.js";
@@ -20,12 +21,17 @@ type DocumentStateOptionsBase = {
 	listen?: boolean;
 };
 
-type PathParam = string | ((user: User | null) => string);
+type PathParam =
+	| string
+	| null
+	| undefined
+	| ((user: User | null) => string | null | undefined);
+type QueryFn = (user: User | null) => Query | null | undefined;
 
 type DocumentStateOptions = DocumentStateOptionsBase &
 	(
 		| {
-				query?: (user: User | null) => Promise<Query>;
+				query?: QueryFn;
 				path?: never;
 		  }
 		| {
@@ -35,21 +41,23 @@ type DocumentStateOptions = DocumentStateOptionsBase &
 		  }
 	);
 
-export class DocumentState<T = DocumentData> extends SubscriberState<T> {
+export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 	private docRef: DocumentReference | undefined;
 	private unsub: Unsubscribe | undefined;
 	private loading = $state(false);
 
-	private readonly auth: Auth | undefined;
+	private readonly auth?: Auth;
 	private readonly firestore: Firestore;
 	private readonly pathFunctionOrString?: PathParam;
 	private readonly listenAtStart: boolean;
 	private readonly getUser: Promise<User | null>;
+	private readonly queryFn?: QueryFn;
 
 	constructor({
 		auth,
 		firestore,
 		path: pathFunctionOrString,
+		query: queryFn,
 		listen: listenAtStart = false
 	}: DocumentStateOptions) {
 		super();
@@ -59,6 +67,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T> {
 		this.pathFunctionOrString = pathFunctionOrString;
 		this.listenAtStart = listenAtStart;
 		this.getUser = get_firebase_user_promise(this.auth);
+		this.queryFn = queryFn;
 	}
 
 	start() {
@@ -84,18 +93,35 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T> {
 		const user = await this.getUser;
 
 		if (this.pathFunctionOrString) {
-			let pathStr: string;
+			let pathStr: string | null | undefined;
 			if (typeof this.pathFunctionOrString === "function") {
-				pathStr = await this.pathFunctionOrString(user);
+				pathStr = this.pathFunctionOrString(user);
 			} else {
 				pathStr = this.pathFunctionOrString;
 			}
+
+			if (!pathStr) {
+				this.docRef = undefined;
+				return this.docRef;
+			}
+
 			const pathArray: [string, ...string[]] = pathStr.split("/") as [
 				string,
 				...string[]
 			];
 
 			this.docRef = doc(this.firestore, ...pathArray);
+		} else if (this.queryFn) {
+			// Run query and get first document ref
+			const queryRef = this.queryFn(user);
+
+			if (!queryRef) {
+				this.docRef = undefined;
+				return this.docRef;
+			}
+
+			const querySnapshot = await getDocs(queryRef);
+			this.docRef = querySnapshot.docs[0]?.ref;
 		}
 
 		return this.docRef;
@@ -106,11 +132,17 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T> {
 
 		const docRef = await this.getQueryRef();
 		if (!docRef) {
+			this.value = null;
 			return;
 		}
 
 		const docSnap = await getDoc(docRef);
-		this.value = docSnap.data() as T;
+
+		if (!docSnap.exists()) {
+			this.value = null;
+		} else {
+			this.value = docSnap.data() as T;
+		}
 
 		this.loading = false;
 	}
@@ -128,9 +160,9 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T> {
 		}
 
 		this.unsub = onSnapshot(docRef, (docSnap) => {
-			if (!docSnap) {
+			if (!docSnap.exists()) {
 				callback?.(null);
-				this.value = undefined;
+				this.value = null;
 				return;
 			}
 			const newData = docSnap.data() as T;
@@ -155,7 +187,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T> {
 		return setDoc(this.docRef, this.value || null, { merge: true });
 	}
 
-	get data(): T | undefined {
+	get data(): T | null | undefined {
 		return this.value;
 	}
 

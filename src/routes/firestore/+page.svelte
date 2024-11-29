@@ -1,13 +1,25 @@
 <script lang="ts">
 	import { DocumentState } from "$lib/DocumentState.svelte.js";
+	import { collection, query, where } from "firebase/firestore";
 	import { firestore } from "../firebase.js";
 	import { firestoreUsersState, type FirestoreUser } from "./states.svelte.js";
 
 	const user = new DocumentState<FirestoreUser>({
 		firestore,
-		listen: true,
-		path: "users/rXY7P670aVJiqrrsyw8z"
+		// listen: true,
+		// path: "users/rXY7P670aVJiqrrsyw8z"
+		query: (u) => {
+			if (u) {
+				// throw new Error("User already exists");
+				return null;
+			}
+			return query(
+				collection(firestore, "users"),
+				where("name", "==", "Pierre")
+			);
+		}
 	});
+	// $inspect(user.data);
 
 	let name = $state("John");
 	let age = $state(0);

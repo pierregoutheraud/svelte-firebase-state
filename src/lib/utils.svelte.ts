@@ -21,6 +21,9 @@ export async function get_firebase_user_promise(
 			auth,
 			(user) => {
 				unsubscribe?.(); // Stop listening after first response
+
+				console.log("user", user);
+
 				if (user) {
 					resolve(user);
 				} else {

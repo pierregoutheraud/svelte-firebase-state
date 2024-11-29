@@ -5,7 +5,6 @@ import {
 	type DocumentData,
 	onSnapshot,
 	type Unsubscribe,
-	QueryDocumentSnapshot,
 	doc,
 	getDoc,
 	DocumentReference,
@@ -21,6 +20,8 @@ type DocumentStateOptionsBase = {
 	listen?: boolean;
 };
 
+type PathParam = string | ((user: User | null) => string);
+
 type DocumentStateOptions = DocumentStateOptionsBase &
 	(
 		| {
@@ -28,42 +29,51 @@ type DocumentStateOptions = DocumentStateOptionsBase &
 				path?: never;
 		  }
 		| {
-				path?: string | ((user: User | null) => Promise<string>);
+				path?: PathParam;
 				query?: never;
 				listen?: boolean;
 		  }
 	);
 
-export class DocumentState<T = DocumentData> {
-	private dataState: SubscriberState<T>;
+export class DocumentState<T = DocumentData> extends SubscriberState<T> {
 	private docRef: DocumentReference | undefined;
 	private unsub: Unsubscribe | undefined;
 	private loading = $state(false);
 
 	private readonly auth: Auth | undefined;
 	private readonly firestore: Firestore;
-	private readonly pathFunctionOrString?:
-		| string
-		| ((user: User | null) => Promise<string>);
+	private readonly pathFunctionOrString?: PathParam;
 	private readonly listenAtStart: boolean;
 	private readonly getUser: Promise<User | null>;
 
 	constructor({
 		auth,
 		firestore,
-		query: query_fn,
 		path: pathFunctionOrString,
 		listen: listenAtStart = false
 	}: DocumentStateOptions) {
+		super();
+
 		this.auth = auth;
 		this.firestore = firestore;
 		this.pathFunctionOrString = pathFunctionOrString;
 		this.listenAtStart = listenAtStart;
 		this.getUser = get_firebase_user_promise(this.auth);
-		this.dataState = new SubscriberState<T>({
-			start: this.start.bind(this),
-			stop: this.stop.bind(this)
-		});
+	}
+
+	start() {
+		if (this.listenAtStart) {
+			this.listen();
+		} else {
+			this.fetch_data();
+		}
+	}
+
+	stop(): void {
+		if (this.unsub) {
+			this.unsub();
+			this.unsub = undefined;
+		}
 	}
 
 	private async getQueryRef(): Promise<typeof this.docRef | undefined> {
@@ -91,10 +101,6 @@ export class DocumentState<T = DocumentData> {
 		return this.docRef;
 	}
 
-	private mapData(doc: QueryDocumentSnapshot<DocumentData, DocumentData>): T {
-		return doc.data() as T;
-	}
-
 	private async fetch_data(): Promise<void> {
 		this.loading = true;
 
@@ -104,7 +110,7 @@ export class DocumentState<T = DocumentData> {
 		}
 
 		const docSnap = await getDoc(docRef);
-		this.dataState.value = docSnap.data() as T;
+		this.value = docSnap.data() as T;
 
 		this.loading = false;
 	}
@@ -124,37 +130,14 @@ export class DocumentState<T = DocumentData> {
 		this.unsub = onSnapshot(docRef, (docSnap) => {
 			if (!docSnap) {
 				callback?.(null);
-				this.dataState.value = undefined;
+				this.value = undefined;
 				return;
 			}
 			const newData = docSnap.data() as T;
-			this.dataState.value = newData;
-			callback?.(this.dataState.value);
+			this.value = newData;
+			callback?.(this.value);
 		});
 		return this.unsub;
-	}
-
-	private start(): void {
-		if (this.listenAtStart) {
-			this.listen();
-		} else {
-			this.fetch_data();
-		}
-	}
-
-	private stop(): void {
-		if (this.unsub) {
-			this.unsub();
-			this.unsub = undefined;
-		}
-	}
-
-	get data(): T | undefined {
-		return this.dataState.value;
-	}
-
-	set data(data: T | undefined) {
-		this.dataState.value = data;
 	}
 
 	get isLoading(): boolean {
@@ -165,11 +148,19 @@ export class DocumentState<T = DocumentData> {
 		return this.fetch_data();
 	}
 
-	save_data_to_firebase(): void {
+	save_data_to_firebase() {
 		if (!this.docRef) {
 			return;
 		}
-		return setDoc(this.docRef, this.dataState.value || null, { merge: true });
+		return setDoc(this.docRef, this.value || null, { merge: true });
+	}
+
+	get data(): T | undefined {
+		return this.value;
+	}
+
+	set data(data: T | undefined) {
+		this.value = data;
 	}
 
 	public save<K extends keyof T>(
@@ -181,19 +172,19 @@ export class DocumentState<T = DocumentData> {
 			return;
 		}
 
-		if (!update || !this.docRef || !this.dataState.value) {
+		if (!update || !this.docRef || !this.value) {
 			return;
 		}
 		let newValue: T[K];
 		if (typeof update === "function") {
 			const updateFn = update as (prevValue: T[K]) => T[K];
-			const prevValue = this.dataState.value[key];
+			const prevValue = this.value[key];
 			newValue = updateFn(prevValue);
 		} else {
 			newValue = update;
 		}
 
-		this.dataState.value[key] = newValue as NonNullable<T>[K];
+		this.value[key] = newValue as NonNullable<T>[K];
 
 		this.save_data_to_firebase();
 	}

@@ -1,19 +1,14 @@
 import { tick } from "svelte";
 
-interface SubscriberStateOptions {
-	start: () => void;
-	stop: () => void;
-}
-
-export class SubscriberState<T> {
+export abstract class SubscriberState<T> {
 	private _value: T | undefined = $state(undefined);
-	private start: SubscriberStateOptions["start"];
-	private stop: SubscriberStateOptions["stop"];
-	subscribers = 0;
+	private subscribers = 0;
 
-	constructor({ start, stop }: SubscriberStateOptions) {
-		this.start = start;
-		this.stop = stop;
+	abstract start(): void;
+	abstract stop(): void;
+
+	constructor(defaultValue?: T) {
+		this._value = defaultValue;
 	}
 
 	public get value(): T | undefined {

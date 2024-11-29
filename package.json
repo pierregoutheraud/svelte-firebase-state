@@ -33,7 +33,7 @@
 	},
 	"peerDependencies": {
 		"svelte": ">=5",
-		"firebase": "11.0.2"
+		"firebase": ">=10"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",

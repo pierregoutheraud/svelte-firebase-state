@@ -7,8 +7,8 @@ import {
 	type DatabaseReference,
 	set
 } from "firebase/database";
-import { tick } from "svelte";
 import { get_firebase_user_promise } from "./utils.svelte.js";
+import { SubscriberState } from "./SubscriberState.svelte.js";
 
 interface CreateNodeStateOptions {
 	auth?: Auth;
@@ -17,9 +17,7 @@ interface CreateNodeStateOptions {
 	autosave?: boolean;
 }
 
-export class NodeState<T> {
-	private _data: T | undefined = $state(undefined);
-	private subscribers: number = 0;
+export class NodeState<T> extends SubscriberState<T> {
 	private unsub?: Unsubscribe;
 	private firstFetchDone: boolean = false;
 	private isUpdatingFromDB: boolean = true;
@@ -28,111 +26,93 @@ export class NodeState<T> {
 	private cleanup: () => void;
 
 	constructor(private options: CreateNodeStateOptions) {
+		super();
 		this.getUser = get_firebase_user_promise(options.auth);
 		this.cleanup = this.initialize_effects();
 	}
 
-	private async start(): Promise<void> {
+	async start() {
 		const user = await this.getUser;
 		const pathStr = await this.options.path(user);
 		this.nodeRef = ref(this.options.database, pathStr);
 		this.unsub = onValue(this.nodeRef, (snapshot) => {
 			this.isUpdatingFromDB = true;
-			this._data = snapshot.val() as T;
+			this.value = snapshot.val() as T;
 			this.firstFetchDone = true;
 		});
 	}
 
-	private stop(): void {
+	stop(): void {
 		this.unsub?.();
 		this.unsub = undefined;
 	}
 
 	private initialize_effects(): () => void {
-		return $effect.root(() => {
-			// $effect(() => {
-			// 	console.log(1, "effect root", this._data, this.isUpdatingFromDB);
-			// 	if (!this.isUpdatingFromDB) {
-			// 		console.log("SAV", this._data);
-			// 	}
-			//
-			// 	this.isUpdatingFromDB = false;
-			// });
+		return () => {};
 
-			// $effect(() => {
-			// 	console.log(this.data?.age);
-			// 	// this.save_data_to_firebase();
-			// });
-
-			// Object.keys(this._data || {}).forEach((key) => {
-			// 	$effect(() => {
-			// 		if (this._data) {
-			// 			console.log("data", this._data[key as keyof T]);
-			// 		}
-			// 	});
-			// });
-
-			// Object.keys(this._data || {}).forEach((key) => {
-			// 	// console.log(this._data?.[key]);
-			// 	this._data?.[key];
-			// });
-			// console.log(1, "isUpdatingFromDB", this.isUpdatingFromDB);
-			//
-			// if (this.nodeRef) {
-			// 	console.log(2);
-			// 	set(this.nodeRef, this._data);
-			// }
-			//
-			// this.isUpdatingFromDB = false;
-			//
-			// return () => console.log("cleanup");
-			// console.log("data", this._data?.["age"]);
-			//
-			// Object.keys(this._data || {}).forEach((key) => {
-			// 	$effect(() => {
-			// 		console.log("data", this._data?.[key]);
-			// 	});
-			// });
-
-			return () => {
-				console.log("effect root cleanup");
-			};
-		});
+		// return $effect.root(() => {
+		// $effect(() => {
+		//     console.log(1, "effect root", this._data, this.isUpdatingFromDB);
+		//     if (!this.isUpdatingFromDB) {
+		//         console.log("SAV", this._data);
+		//     }
+		//
+		//     this.isUpdatingFromDB = false;
+		// });
+		// $effect(() => {
+		//     console.log(this.data?.age);
+		//     // this.save_data_to_firebase();
+		// });
+		// Object.keys(this._data || {}).forEach((key) => {
+		//     $effect(() => {
+		//         if (this._data) {
+		//             console.log("data", this._data[key as keyof T]);
+		//         }
+		//     });
+		// });
+		// Object.keys(this._data || {}).forEach((key) => {
+		//     // console.log(this._data?.[key]);
+		//     this._data?.[key];
+		// });
+		// console.log(1, "isUpdatingFromDB", this.isUpdatingFromDB);
+		//
+		// if (this.nodeRef) {
+		//     console.log(2);
+		//     set(this.nodeRef, this._data);
+		// }
+		//
+		// this.isUpdatingFromDB = false;
+		//
+		// return () => console.log("cleanup");
+		// console.log("data", this._data?.["age"]);
+		//
+		// Object.keys(this._data || {}).forEach((key) => {
+		//     $effect(() => {
+		//         console.log("data", this._data?.[key]);
+		//     });
+		// });
+		return () => {
+			console.log("effect root cleanup");
+		};
+		// });
 	}
 
-	public get data(): T | undefined {
-		if ($effect.tracking()) {
-			$effect(() => {
-				if (this.subscribers === 0) {
-					this.start();
-				}
-				this.subscribers++;
-
-				return () => {
-					tick().then(() => {
-						this.subscribers--;
-						if (this.subscribers === 0) {
-							this.stop();
-						}
-					});
-				};
-			});
-		}
-		return this._data;
+	get data(): T | undefined {
+		return this.value;
 	}
 
-	public set data(newValue: T | undefined) {
-		this._data = newValue;
+	set data(newValue: T | undefined) {
+		this.value = newValue;
 		if (this.options.autosave) {
 			this.save_data_to_firebase();
 		}
 	}
 
 	private save_data_to_firebase() {
-		if (!this.nodeRef || !this._data) {
+		if (!this.nodeRef || !this.value) {
 			return;
 		}
-		set(this.nodeRef, this._data);
+		set(this.nodeRef, this.value);
 	}
 
 	public save<K extends keyof T>(
@@ -144,21 +124,20 @@ export class NodeState<T> {
 			return;
 		}
 
-		if (!update || !this.nodeRef || !this._data) {
+		if (!update || !this.nodeRef || !this.value) {
 			return;
 		}
 
 		let newValue: T[K];
 		if (typeof update === "function") {
 			const updateFn = update as (prevValue: T[K]) => T[K];
-			const prevValue = this._data[key];
+			const prevValue = this.value[key];
 			newValue = updateFn(prevValue);
 		} else {
 			newValue = update;
 		}
 
-		this._data[key] = newValue as NonNullable<T>[K];
-
+		this.value[key] = newValue as NonNullable<T>[K];
 		this.save_data_to_firebase();
 	}
 

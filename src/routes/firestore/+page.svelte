@@ -9,9 +9,9 @@
 		path: "users/rXY7P670aVJiqrrsyw8z"
 	});
 
-	// let name = $state("John");
-	// let age = $state(0);
-	//
+	let name = $state("John");
+	let age = $state(0);
+
 	// function onAdd() {
 	// 	firestoreUsersState.add({
 	// 		name,
@@ -28,26 +28,41 @@
 	// }
 </script>
 
-<!-- <div> -->
-<!-- 	{#if firestoreUsersState.data} -->
-<!-- 		{#each firestoreUsersState.data as user} -->
-<!-- 			<div>{user.name} - {user.age}</div> -->
-<!-- 		{/each} -->
-<!-- 	{/if} -->
-<!-- </div> -->
-<!---->
-<!-- <div> -->
-<!-- 	<input type="text" bind:value={name} /> -->
-<!-- 	<input type="number" bind:value={age} /> -->
-<!-- 	<button onclick={onAdd}>Add</button> -->
-<!-- </div> -->
+<main>
+	<div>
+		{#if firestoreUsersState.data}
+			{#each firestoreUsersState.data as user}
+				<div>{user.name} - {user.age}</div>
+			{/each}
+		{/if}
+	</div>
 
-{JSON.stringify(user.data)}
-<button
-	onclick={() => {
-		if (user.data) {
-			user.data.age++;
-			user.save();
-		}
-	}}>Change</button
->
+	<!-- <div> -->
+	<!-- 	<input type="text" bind:value={name} /> -->
+	<!-- 	<input type="number" bind:value={age} /> -->
+	<!-- 	<button onclick={onAdd}>Add</button> -->
+	<!-- </div> -->
+
+	<div>
+		{JSON.stringify(user.data)}
+		<button
+			onclick={() => {
+				if (user.data) {
+					user.data.age++;
+					user.save();
+				}
+			}}>Change</button
+		>
+	</div>
+</main>
+
+<style>
+	main {
+		display: flex;
+		flex-direction: column;
+	}
+
+	div {
+		margin: 20px;
+	}
+</style>

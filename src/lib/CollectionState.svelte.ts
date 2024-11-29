@@ -13,8 +13,8 @@ import {
 	CollectionReference
 } from "firebase/firestore";
 import { type Auth } from "firebase/auth";
-import { tick } from "svelte";
 import { get_firebase_user_promise } from "./utils.svelte.js";
+import { SubscriberState } from "./SubscriberState.svelte.js";
 
 type CreateCollectionStateOptionsBase = {
 	auth?: Auth;
@@ -35,17 +35,15 @@ type CreateCollectionStateOptions = CreateCollectionStateOptionsBase &
 		  }
 	);
 
-export class CollectionState<T = DocumentData> {
-	private _data: T[] | undefined = $state(undefined);
+export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 	private queryRef: Query | undefined;
 	private unsub: Unsubscribe | undefined;
-	private subscribers = 0;
 	private loading = $state(false);
 
 	private collection_ref: CollectionReference | undefined;
 	private readonly auth: Auth | undefined;
 	private readonly firestore: Firestore;
-	private readonly query_fn?: (user: User | null) => Promise<Query>;
+	private readonly queryFn?: (user: User | null) => Promise<Query>;
 	private readonly pathFunctionOrString?:
 		| string
 		| ((user: User | null) => Promise<string>);
@@ -55,13 +53,14 @@ export class CollectionState<T = DocumentData> {
 	constructor({
 		auth,
 		firestore,
-		query: query_fn,
+		query: queryFn,
 		path: pathFunctionOrString,
 		listen: listenAtStart = false
 	}: CreateCollectionStateOptions) {
+		super();
 		this.auth = auth;
 		this.firestore = firestore;
-		this.query_fn = query_fn;
+		this.queryFn = queryFn;
 		this.pathFunctionOrString = pathFunctionOrString;
 		this.listenAtStart = listenAtStart;
 		this.getUser = get_firebase_user_promise(this.auth);
@@ -87,8 +86,8 @@ export class CollectionState<T = DocumentData> {
 			];
 			this.collection_ref = collection(this.firestore, ...pathArray);
 			this.queryRef = firestoreQuery(this.collection_ref);
-		} else if (this.query_fn) {
-			this.queryRef = await this.query_fn(user);
+		} else if (this.queryFn) {
+			this.queryRef = await this.queryFn(user);
 		}
 
 		return this.queryRef;
@@ -105,7 +104,7 @@ export class CollectionState<T = DocumentData> {
 			return;
 		}
 		const querySnapshot = await getDocs(queryRef);
-		this._data = querySnapshot.docs.map((doc) => this.mapData(doc));
+		this.value = querySnapshot.docs.map((doc) => this.mapData(doc));
 		this.loading = false;
 	}
 
@@ -122,17 +121,17 @@ export class CollectionState<T = DocumentData> {
 		this.unsub = onSnapshot(queryRef, (querySnapshot) => {
 			if (querySnapshot.empty) {
 				callback?.([]);
-				this._data = [];
+				this.value = [];
 				return;
 			}
 			const newData = querySnapshot.docs.map((doc) => this.mapData(doc));
-			this._data = newData;
-			callback?.(this._data);
+			this.value = newData;
+			callback?.(this.value);
 		});
 		return this.unsub;
 	}
 
-	private start(): void {
+	start(): void {
 		if (this.listenAtStart) {
 			this.listen();
 		} else {
@@ -140,7 +139,7 @@ export class CollectionState<T = DocumentData> {
 		}
 	}
 
-	private stop(): void {
+	stop(): void {
 		if (this.unsub) {
 			this.unsub();
 			this.unsub = undefined;
@@ -148,28 +147,7 @@ export class CollectionState<T = DocumentData> {
 	}
 
 	get data(): T[] | undefined {
-		if ($effect.tracking()) {
-			$effect(() => {
-				if (this.subscribers === 0) {
-					this.start();
-				}
-				this.subscribers++;
-
-				return () => {
-					tick().then(() => {
-						this.subscribers--;
-						if (this.subscribers === 0) {
-							this.stop();
-						}
-					});
-				};
-			});
-		}
-		return this._data;
-	}
-
-	set data(data: T[] | undefined) {
-		this._data = data;
+		return this.value;
 	}
 
 	get isLoading(): boolean {
@@ -184,7 +162,8 @@ export class CollectionState<T = DocumentData> {
 		if (!this.collection_ref) {
 			return;
 		}
-		this.data?.push(data);
+		const currentData = this.value || [];
+		this.value = [...currentData, data];
 		const docRef = await addDoc(this.collection_ref, data as DocumentData);
 		return docRef.id;
 	}

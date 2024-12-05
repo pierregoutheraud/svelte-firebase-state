@@ -40,7 +40,7 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 	private unsub: Unsubscribe | undefined;
 	private loading = $state(false);
 
-	private collection_ref: CollectionReference | undefined;
+	private collectionRef: CollectionReference | undefined;
 	private readonly auth: Auth | undefined;
 	private readonly firestore: Firestore;
 	private readonly queryFn?: (user: User | null) => Promise<Query>;
@@ -84,8 +84,8 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 				string,
 				...string[]
 			];
-			this.collection_ref = collection(this.firestore, ...pathArray);
-			this.queryRef = firestoreQuery(this.collection_ref);
+			this.collectionRef = collection(this.firestore, ...pathArray);
+			this.queryRef = firestoreQuery(this.collectionRef);
 		} else if (this.queryFn) {
 			this.queryRef = await this.queryFn(user);
 		}
@@ -159,12 +159,14 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 	}
 
 	async add(data: T): Promise<string | void> {
-		if (!this.collection_ref) {
+		console.log(1, "add");
+		if (!this.collectionRef) {
 			return;
 		}
+		console.log(2, "add");
 		const currentData = this.value || [];
 		this.value = [...currentData, data];
-		const docRef = await addDoc(this.collection_ref, data as DocumentData);
+		const docRef = await addDoc(this.collectionRef, data as DocumentData);
 		return docRef.id;
 	}
 }

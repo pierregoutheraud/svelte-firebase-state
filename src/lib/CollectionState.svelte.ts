@@ -10,10 +10,15 @@ import {
 	type Unsubscribe,
 	QueryDocumentSnapshot,
 	addDoc,
-	CollectionReference
+	CollectionReference,
+	deleteDoc,
+	doc
 } from "firebase/firestore";
 import { type Auth } from "firebase/auth";
-import { get_firebase_user_promise } from "./utils.svelte.js";
+import {
+	genericIdConverter,
+	get_firebase_user_promise
+} from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
 
 type CreateCollectionStateOptionsBase = {
@@ -35,7 +40,10 @@ type CreateCollectionStateOptions = CreateCollectionStateOptionsBase &
 		  }
 	);
 
-export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
+export class CollectionState<
+	T extends DocumentData,
+	TConverted extends T & { id: string } = T & { id: string }
+> extends SubscriberState<TConverted[]> {
 	private queryRef: Query | undefined;
 	private unsub: Unsubscribe | undefined;
 	private loading = $state(false);
@@ -66,6 +74,14 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 		this.getUser = get_firebase_user_promise(this.auth);
 	}
 
+	private getCollectionFromPath(path: string) {
+		const pathArray: [string, ...string[]] = path.split("/") as [
+			string,
+			...string[]
+		];
+		return collection(this.firestore, ...pathArray);
+	}
+
 	private async getQueryRef(): Promise<Query | undefined> {
 		if (this.queryRef) {
 			return this.queryRef;
@@ -80,21 +96,24 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 			} else {
 				pathStr = this.pathFunctionOrString;
 			}
-			const pathArray: [string, ...string[]] = pathStr.split("/") as [
-				string,
-				...string[]
-			];
-			this.collectionRef = collection(this.firestore, ...pathArray);
+			this.collectionRef = this.getCollectionFromPath(pathStr);
 			this.queryRef = firestoreQuery(this.collectionRef);
 		} else if (this.queryFn) {
 			this.queryRef = await this.queryFn(user);
+			if ("path" in this.queryRef) {
+				this.collectionRef = this.getCollectionFromPath(
+					this.queryRef.path as string
+				);
+			}
 		}
 
 		return this.queryRef;
 	}
 
-	private mapData(doc: QueryDocumentSnapshot<DocumentData, DocumentData>): T {
-		return doc.data() as T;
+	private mapData(
+		doc: QueryDocumentSnapshot<TConverted, DocumentData>
+	): TConverted {
+		return doc.data();
 	}
 
 	private async fetch_data(): Promise<void> {
@@ -103,13 +122,15 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 		if (!queryRef) {
 			return;
 		}
-		const querySnapshot = await getDocs(queryRef);
+		const querySnapshot = await getDocs(
+			queryRef.withConverter(genericIdConverter<T, TConverted>())
+		);
 		this.value = querySnapshot.docs.map((doc) => this.mapData(doc));
 		this.loading = false;
 	}
 
 	private async listen(
-		callback?: (d: T[]) => void
+		callback?: (d: TConverted[]) => void
 	): Promise<Unsubscribe | undefined> {
 		if (this.unsub) {
 			return;
@@ -118,16 +139,19 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 		if (!queryRef) {
 			return;
 		}
-		this.unsub = onSnapshot(queryRef, (querySnapshot) => {
-			if (querySnapshot.empty) {
-				callback?.([]);
-				this.value = [];
-				return;
+		this.unsub = onSnapshot(
+			queryRef.withConverter(genericIdConverter<T, TConverted>()),
+			(querySnapshot) => {
+				if (querySnapshot.empty) {
+					callback?.([]);
+					this.value = [];
+					return;
+				}
+				const newData = querySnapshot.docs.map((doc) => this.mapData(doc));
+				this.value = newData;
+				callback?.(this.value);
 			}
-			const newData = querySnapshot.docs.map((doc) => this.mapData(doc));
-			this.value = newData;
-			callback?.(this.value);
-		});
+		);
 		return this.unsub;
 	}
 
@@ -146,7 +170,7 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 		}
 	}
 
-	get data(): T[] | undefined {
+	get data(): TConverted[] | undefined {
 		return this.value;
 	}
 
@@ -159,14 +183,39 @@ export class CollectionState<T = DocumentData> extends SubscriberState<T[]> {
 	}
 
 	async add(data: T): Promise<string | void> {
-		console.log(1, "add");
+		if (!this.collectionRef) {
+			console.log("Collection reference is not set");
+			return;
+		}
+
+		const currentData = this.value || [];
+		const randomId = Math.random().toString(36).substring(7);
+		const newData = { id: randomId, ...data } as TConverted;
+		this.value = [...currentData, newData];
+		const docRef = await addDoc(this.collectionRef, data as DocumentData);
+		this.value = this.value.map((d) => {
+			if (d.id === randomId) {
+				return { id: docRef.id, ...data } as TConverted;
+			}
+			return d;
+		});
+		return docRef.id;
+	}
+
+	getDocRef(id: string) {
+		if (!this.collectionRef) {
+			throw new Error("Collection reference is not set");
+		}
+
+		return doc(this.collectionRef, id);
+	}
+
+	async delete(id: string): Promise<void> {
 		if (!this.collectionRef) {
 			return;
 		}
-		console.log(2, "add");
-		const currentData = this.value || [];
-		this.value = [...currentData, data];
-		const docRef = await addDoc(this.collectionRef, data as DocumentData);
-		return docRef.id;
+
+		const docRef = this.getDocRef(id);
+		return deleteDoc(docRef);
 	}
 }

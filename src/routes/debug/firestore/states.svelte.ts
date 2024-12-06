@@ -1,6 +1,6 @@
 import { CollectionState } from "$lib/index.js";
 import { collection, query } from "firebase/firestore";
-import { firestore } from "../firebase.js";
+import { firestore } from "../../www-lib/firebase.js";
 
 export interface FirestoreUser {
 	name: string;

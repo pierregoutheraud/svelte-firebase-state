@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { DocumentState } from "$lib/DocumentState.svelte.js";
 	import { collection, query, where } from "firebase/firestore";
-	import { firestore } from "../firebase.js";
 	import { type FirestoreUser } from "./states.svelte.js";
+	import { firestore } from "../../../www-lib/firebase.js";
 
 	const user = new DocumentState<FirestoreUser>({
 		firestore,

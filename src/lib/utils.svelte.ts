@@ -1,4 +1,10 @@
 import { onAuthStateChanged, type Auth, type User } from "firebase/auth";
+import type {
+	DocumentData,
+	FirestoreDataConverter,
+	QueryDocumentSnapshot,
+	WithFieldValue
+} from "firebase/firestore";
 import { untrack } from "svelte";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,3 +38,16 @@ export async function get_firebase_user_promise(
 		);
 	});
 }
+
+export const genericIdConverter = <
+	T extends DocumentData,
+	TConverted
+>(): FirestoreDataConverter<TConverted> => ({
+	toFirestore: (data: WithFieldValue<any>) => data,
+	fromFirestore: (snap: QueryDocumentSnapshot): TConverted => {
+		return {
+			id: snap.id,
+			...snap.data()
+		} as unknown as TConverted;
+	}
+});

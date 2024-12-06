@@ -32,8 +32,8 @@
 		}
 	},
 	"peerDependencies": {
-		"svelte": ">=5",
-		"firebase": ">=10"
+		"firebase": ">=10",
+		"svelte": ">=5"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -47,12 +47,12 @@
 		"prettier": "^3.3.2",
 		"prettier-plugin-svelte": "^3.2.6",
 		"publint": "^0.2.0",
+		"shiki": "^1.24.0",
 		"svelte": "5.2.9",
 		"svelte-check": "^4.0.0",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.0.0",
 		"vite": "^5.0.11",
 		"vitest": "^2.0.4"
-	},
-	"dependencies": {}
+	}
 }

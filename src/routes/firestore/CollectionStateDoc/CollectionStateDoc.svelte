@@ -13,11 +13,29 @@
 
 <CodeSnippet
 	language="typescript"
+	code={`const users = new CollectionState<User>({
+  auth,
+  firestore,
+	listen: true,
+	path: "your/firestore/collection/path",
+});`}
+/>
+<CodeSnippet
+	language="typescript"
 	code={`type CollectionStateOptions = {
-  firestore: Firestore;
-  path: string | ((user: User | null) => string);
+  // The firebase auth instance (optional)
   auth?: Auth;
-  query?: (user: User | null) => QueryConstraint[];
+
+  // The firebase firestore instance
+  firestore: Firestore;
+
+  // The path to the collection
+  path: string | ((currentUser: User | null) => string);
+
+  // The query constraints (optional)
+  query?: (currentUser: User | null) => QueryConstraint[];
+
+  // Listen for real-time updates (optional - default: false)
   listen?: boolean;
 };`}
 />

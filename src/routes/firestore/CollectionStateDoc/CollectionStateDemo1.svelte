@@ -10,10 +10,8 @@
 	const users = new CollectionState<User>({
 		firestore,
 		listen: true,
-		path: (user) => "users",
-		query: (user) => {
-			return [orderBy("name", "asc")];
-		}
+		path: "users",
+		query: () => [orderBy("name", "asc")]
 	});
 
 	let name = $state("Mickey");
@@ -22,6 +20,7 @@
 		users.add({ name });
 	}
 
+	// svelte-firebase-state adds the id of the document in the data
 	function handleRemove(user: User & { id: string }) {
 		users.delete(user.id);
 	}

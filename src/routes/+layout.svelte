@@ -3,6 +3,8 @@
 	import GithubIcon from "../components/GithubIcon.svelte";
 	import type { Snippet } from "svelte";
 	import { page } from "$app/stores";
+	import Nav from "../www-components/Nav/Nav.svelte";
+	import NavItem from "../www-components/Nav/NavItem.svelte";
 
 	interface Props {
 		children: Snippet;
@@ -37,17 +39,16 @@
 	</header>
 
 	<section class="docs">
-		<div class="nav">
+		<Nav>
 			{#each routes as route}
-				<a
+				<NavItem
 					href={route.pathname}
-					class="nav-item"
-					class:active={$page.url.pathname === route.pathname}
+					active={$page.url.pathname === route.pathname}
 				>
 					{route.name}
-				</a>
+				</NavItem>
 			{/each}
-		</div>
+		</Nav>
 
 		{@render children()}
 	</section>

@@ -2,7 +2,7 @@
 	import { NodeState } from "$lib/NodeState.svelte.js";
 	import { NodeListState } from "$lib/NodeListState.svelte.js";
 	import { ChildState, ParentState } from "$lib/test.svelte.js";
-	import { rdb } from "../firebase.js";
+	import { rdb } from "../../../www-lib/firebase.js";
 	import { user, type RealtimeUser } from "./states.svelte.js";
 
 	export const users = new NodeListState<RealtimeUser>({

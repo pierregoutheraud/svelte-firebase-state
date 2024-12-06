@@ -15,6 +15,7 @@
 
 	let codeFormatted = $derived.by(() => {
 		let s = replaceTabsBySpaces(code);
+		s = s.trim();
 		s = s.replace(
 			`"$lib/CollectionState.svelte.js"`,
 			`"svelte-firebase-state"`

@@ -26,7 +26,7 @@
 		color: var(--black);
 		text-decoration: none;
 		font-size: 20px;
-		padding: 10px 8px;
+		padding: 8px 6px;
 		opacity: 0.8;
 		text-align: center;
 		cursor: pointer;

@@ -1,6 +1,6 @@
 import { NodeListState } from "$lib/NodeListState.svelte.js";
 import { NodeState } from "$lib/NodeState.svelte.js";
-import { rdb } from "../../www-lib/firebase.js";
+import { rdb } from "../../../www-lib/firebase.js";
 
 export interface RealtimeUser {
 	id: string;

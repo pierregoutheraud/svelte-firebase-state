@@ -14,13 +14,17 @@
 
 <CodeSnippet
 	language="typescript"
-	code={`type DocumentStateOptionsBase = {
-	auth?: Auth;
-	firestore: Firestore;
-	listen?: boolean;
-};
+	code={`
+const user = new DocumentState<User>({
+  firestore,
+	listen: true,
+  path: "your/firestore/document/path",
+});`}
+/>
 
-type PathParam =
+<CodeSnippet
+	language="typescript"
+	code={`type PathParam =
 	| string
 	| null
 	| undefined
@@ -28,15 +32,32 @@ type PathParam =
 
 type QueryParamsFn = (user: User | null) => QueryConstraint[];
 
+type DocumentStateOptionsBase = {
+  // The firebase auth instance (optional)
+	auth?: Auth;
+
+  // The firebase firestore instance
+	firestore: Firestore;
+
+  // Listen for real-time updates (optional - default: false)
+	listen?: boolean;
+};
+
 type DocumentStateOptions = DocumentStateOptionsBase &
 	(
 		| {
 				path?: never;
+
+        // The path to the collection (optional - Example below)
 				collectionPath?: PathParam;
+        
+        // The query constraints (optional - Example below)
 				query?: QueryParamsFn;
 		  }
 		| {
+        // The path to the document
 				path?: PathParam;
+
 				collectionPath?: never;
 				query?: never;
 		  }

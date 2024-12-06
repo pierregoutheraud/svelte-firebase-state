@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { addDoc, collection, orderBy, query } from "firebase/firestore";
+	import { addDoc, collection, orderBy } from "firebase/firestore";
 	import { CollectionState } from "$lib/CollectionState.svelte.js";
-	import { firestore } from "../../www-lib/firebase.js";
+	import { firestore } from "../../../www-lib/firebase.js";
 
 	interface User {
 		name: string;
@@ -10,9 +10,9 @@
 	const users = new CollectionState<User>({
 		firestore,
 		listen: true,
-		query: async () => {
-			return query(collection(firestore, `users`), orderBy("name", "asc"));
-			// return query(collection(firestore, `users`));
+		path: (user) => "users",
+		query: (user) => {
+			return [orderBy("name", "asc")];
 		}
 	});
 
@@ -26,22 +26,28 @@
 		users.delete(user.id);
 	}
 
-	function handleRandom() {
-		// You can also use your own custom code, the data state will be updated
+	function handleAddRandom() {
+		// You can also use your own code to edit the database,
+		// the data state will be updated.
 		const randomName = Math.random().toString(36).substring(7);
 		addDoc(collection(firestore, "users"), { name: randomName });
 	}
 </script>
 
 <div class="demo">
+	<div class="form">
+		<input type="text" bind:value={name} />
+		<button onclick={handleAdd}>Add user</button>
+		<button onclick={handleAddRandom}>Add a random user</button>
+	</div>
+
 	{#if users.data?.length}
 		<div class="users">
 			{#each users.data as user (user.id)}
 				<div class="user">
 					<img
-						src={`https://identicons-server.fly.dev/${user.name}?pixelSize=20`}
+						src={`https://identicons-server.fly.dev/${user.name}?pixelSize=4&width=30&height=30`}
 						alt="user"
-						width="30"
 					/>
 					<p>{user.name}</p>
 					<button onclick={() => handleRemove(user)}>Remove user</button>
@@ -49,12 +55,6 @@
 			{/each}
 		</div>
 	{/if}
-
-	<div class="form">
-		<input type="text" bind:value={name} />
-		<button onclick={handleAdd}>Add user</button>
-		<button onclick={handleRandom}>Add a random user</button>
-	</div>
 </div>
 
 <style>

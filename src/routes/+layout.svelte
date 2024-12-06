@@ -1,15 +1,8 @@
 <script lang="ts">
 	import "./global.css";
 	import GithubIcon from "../components/GithubIcon.svelte";
-	// import CodeSnippet from "../www-components/CodeSnippet/CodeSnippet.svelte";
-	import CollectionStateDemo1 from "../www-components/CollectionStateExample1/CollectionStateDemo1.svelte";
-	import CollectionStateDemo1Code from "../www-components/CollectionStateExample1/CollectionStateDemo1Code.js";
-	import Example from "../www-components/Example/Example.svelte";
-	import Expandable from "../www-components/Expandable/Expandable.svelte";
 	import type { Snippet } from "svelte";
 	import { page } from "$app/stores";
-	// import CollectionStateExample1 from "../www-components/CollectionStateExample1/CollectionStateExample1.svelte";
-	// import CollectionStateExample2 from "../www-components/CollectionStateExample2/CollectionStateExample2.svelte";
 
 	interface Props {
 		children: Snippet;
@@ -19,7 +12,7 @@
 	const routes = [
 		{ name: "What is it?", pathname: "/" },
 		{ name: "Firestore", pathname: "/firestore" },
-		{ name: "Realtime", pathname: "/realtime" }
+		{ name: "Realtime Database", pathname: "/realtime" }
 	];
 </script>
 
@@ -57,21 +50,6 @@
 		</div>
 
 		{@render children()}
-
-		<!-- <h2>Firestore</h2> -->
-
-		<!-- <div class="doc"> -->
-		<!-- 	<h3>CollectionsState class</h3> -->
-		<!-- 	<Expandable>yolo</Expandable> -->
-		<!-- <div class="examples"> -->
-		<!-- 	<Example -->
-		<!-- 		text="Example: Listen to a collection" -->
-		<!-- 		code={CollectionStateDemo1Code} -->
-		<!-- 	> -->
-		<!-- 		<CollectionStateDemo1 /> -->
-		<!-- 	</Example> -->
-		<!-- </div> -->
-		<!-- </div> -->
 	</section>
 </main>
 
@@ -112,9 +90,9 @@
 
 	.version {
 		font-size: 14px;
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		color: var(--black);
-		padding: 4px 8px;
+		padding: 4px 9px 4px 8px;
+		border: 1px solid rgba(0, 0, 0, 0.5);
+		color: rgba(0, 0, 0, 0.5);
 	}
 
 	.source {
@@ -168,18 +146,6 @@
 		gap: 20px;
 		padding: 40px 0 500px;
 		width: 1000px;
-	}
-
-	.doc {
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-	}
-
-	.examples {
-		display: flex;
-		flex-direction: column;
-		gap: 40px;
 	}
 
 	.nav {

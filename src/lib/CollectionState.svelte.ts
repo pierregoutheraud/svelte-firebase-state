@@ -1,4 +1,3 @@
-import { type User } from "firebase/auth";
 import {
 	collection,
 	Firestore,
@@ -12,33 +11,25 @@ import {
 	addDoc,
 	CollectionReference,
 	deleteDoc,
-	doc
+	doc,
+	QueryConstraint
 } from "firebase/firestore";
-import { type Auth } from "firebase/auth";
+import { type Auth, type User } from "firebase/auth";
 import {
 	genericIdConverter,
 	get_firebase_user_promise
 } from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
 
-type CreateCollectionStateOptionsBase = {
+type QueryParamsFn = (user: User | null) => QueryConstraint[];
+
+type CollectionStateOptions = {
 	auth?: Auth;
 	firestore: Firestore;
+	path: string | ((user: User | null) => string);
+	query?: QueryParamsFn;
 	listen?: boolean;
 };
-
-type CreateCollectionStateOptions = CreateCollectionStateOptionsBase &
-	(
-		| {
-				query?: (user: User | null) => Promise<Query>;
-				path?: never;
-		  }
-		| {
-				path?: string | ((user: User | null) => Promise<string>);
-				query?: never;
-				listen?: boolean;
-		  }
-	);
 
 export class CollectionState<
 	T extends DocumentData,
@@ -51,24 +42,24 @@ export class CollectionState<
 	private collectionRef: CollectionReference | undefined;
 	private readonly auth: Auth | undefined;
 	private readonly firestore: Firestore;
-	private readonly queryFn?: (user: User | null) => Promise<Query>;
-	private readonly pathFunctionOrString?:
+	private readonly queryParamsFn?: QueryParamsFn;
+	private readonly pathFunctionOrString:
 		| string
-		| ((user: User | null) => Promise<string>);
+		| ((user: User | null) => string);
 	private readonly listenAtStart: boolean;
 	private readonly getUser: Promise<User | null>;
 
 	constructor({
 		auth,
 		firestore,
-		query: queryFn,
+		query: queryParamsFn,
 		path: pathFunctionOrString,
 		listen: listenAtStart = false
-	}: CreateCollectionStateOptions) {
+	}: CollectionStateOptions) {
 		super();
 		this.auth = auth;
 		this.firestore = firestore;
-		this.queryFn = queryFn;
+		this.queryParamsFn = queryParamsFn;
 		this.pathFunctionOrString = pathFunctionOrString;
 		this.listenAtStart = listenAtStart;
 		this.getUser = get_firebase_user_promise(this.auth);
@@ -89,23 +80,17 @@ export class CollectionState<
 
 		const user = await this.getUser;
 
-		if (this.pathFunctionOrString) {
-			let pathStr: string;
-			if (typeof this.pathFunctionOrString === "function") {
-				pathStr = await this.pathFunctionOrString(user);
-			} else {
-				pathStr = this.pathFunctionOrString;
-			}
-			this.collectionRef = this.getCollectionFromPath(pathStr);
-			this.queryRef = firestoreQuery(this.collectionRef);
-		} else if (this.queryFn) {
-			this.queryRef = await this.queryFn(user);
-			if ("path" in this.queryRef) {
-				this.collectionRef = this.getCollectionFromPath(
-					this.queryRef.path as string
-				);
-			}
+		let pathStr: string;
+		if (typeof this.pathFunctionOrString === "function") {
+			pathStr = this.pathFunctionOrString(user);
+		} else {
+			pathStr = this.pathFunctionOrString;
 		}
+
+		this.collectionRef = this.getCollectionFromPath(pathStr);
+
+		const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
+		this.queryRef = firestoreQuery(this.collectionRef, ...queryParams);
 
 		return this.queryRef;
 	}

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import CollectionStateDebug from "./CollectionStateDebug.svelte";
+	// import CollectionStateDebug from "./CollectionStateDebug.svelte";
 	import DocumentStateDebug from "./DocumentStateDebug.svelte";
 </script>
 
 <main>
-	<!-- <DocumentStateDebug /> -->
-	<CollectionStateDebug />
+	<DocumentStateDebug />
+	<!-- <CollectionStateDebug /> -->
 </main>
 
 <style>

@@ -68,16 +68,10 @@ $inspect(tasks.data);`}
 </div>
 
 <div class="paragraph">
-	<p>
-		4. Perform CRUD Operations using provided methods to interact with Firebase.
-	</p>
+	<p>4. Perform CRUD Operations using class methods.</p>
 	<CodeSnippet
 		language="svelte"
 		code={`<script>
-  function handleSave() {
-    tasks.save();
-  }
-
   function handleAdd(newTask) {
     tasks.add(newTask);
   }

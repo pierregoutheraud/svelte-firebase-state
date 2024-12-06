@@ -1,11 +1,9 @@
 <script lang="ts">
 	import CodeSnippet from "../../www-components/CodeSnippet/CodeSnippet.svelte";
-	import CollectionStateDemo1 from "../../www-components/CollectionStateExample1/CollectionStateDemo1.svelte";
-	import CollectionStateDemo1Code from "../../www-components/CollectionStateExample1/CollectionStateDemo1Code.js";
-	import Example from "../../www-components/Example/Example.svelte";
-	import Expandable from "../../www-components/Expandable/Expandable.svelte";
 	import Nav from "../../www-components/Nav/Nav.svelte";
 	import NavItem from "../../www-components/Nav/NavItem.svelte";
+	import CollectionStateDoc from "./CollectionStateDoc/CollectionStateDoc.svelte";
+	import DocumentStateDoc from "./DocumentStateDoc/DocumentStateDoc.svelte";
 
 	let sectionDisplayed: 1 | 2 = $state(1);
 </script>
@@ -30,22 +28,9 @@
 
 	<div class="content">
 		{#if sectionDisplayed === 1}
-			<p>
-				CollectionState -> Manages a Firestore collection. Fetches data, listens
-				for real-time updates, and provides utilities for adding, updating, and
-				deleting documents.
-			</p>
-			<Example
-				text="Example: Listen to a collection"
-				code={CollectionStateDemo1Code}
-			>
-				<CollectionStateDemo1 />
-			</Example>
+			<CollectionStateDoc />
 		{:else}
-			<p>
-				DocumentState -> Handles a single Firestore document, supporting
-				fetching, live updates, and saving changes to Firebase.
-			</p>
+			<DocumentStateDoc />
 		{/if}
 	</div>
 </div>
@@ -93,10 +78,9 @@
 	}
 
 	.content {
+		display: flex;
+		flex-direction: column;
+		gap: 30px;
 		padding: 40px 0;
-	}
-
-	.content > p:first-child {
-		margin-bottom: 20px;
 	}
 </style>

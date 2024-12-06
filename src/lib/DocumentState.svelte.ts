@@ -9,7 +9,11 @@ import {
 	getDoc,
 	DocumentReference,
 	setDoc,
-	getDocs
+	getDocs,
+	collection,
+	query,
+	QueryConstraint,
+	limit
 } from "firebase/firestore";
 import { type Auth } from "firebase/auth";
 import { get_firebase_user_promise } from "./utils.svelte.js";
@@ -26,18 +30,20 @@ type PathParam =
 	| null
 	| undefined
 	| ((user: User | null) => string | null | undefined);
-type QueryFn = (user: User | null) => Query | null | undefined;
+
+type QueryParamsFn = (user: User | null) => QueryConstraint[];
 
 type DocumentStateOptions = DocumentStateOptionsBase &
 	(
 		| {
-				query?: QueryFn;
 				path?: never;
+				collectionPath?: PathParam;
+				query?: QueryParamsFn;
 		  }
 		| {
 				path?: PathParam;
+				collectionPath?: never;
 				query?: never;
-				listen?: boolean;
 		  }
 	);
 
@@ -50,15 +56,17 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 	private readonly auth?: Auth;
 	private readonly firestore: Firestore;
 	private readonly pathFunctionOrString?: PathParam;
+	private readonly collectionPathFunctionOrString?: PathParam;
 	private readonly listenAtStart: boolean;
 	private readonly getUser: Promise<User | null>;
-	private readonly queryFn?: QueryFn;
+	private readonly queryParams?: QueryParamsFn;
 
 	constructor({
 		auth,
 		firestore,
 		path: pathFunctionOrString,
-		query: queryFn,
+		collectionPath: collectionPathFunctionOrString,
+		query: queryParams,
 		listen: listenAtStart = false
 	}: DocumentStateOptions) {
 		super();
@@ -66,9 +74,10 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 		this.auth = auth;
 		this.firestore = firestore;
 		this.pathFunctionOrString = pathFunctionOrString;
+		this.collectionPathFunctionOrString = collectionPathFunctionOrString;
 		this.listenAtStart = listenAtStart;
 		this.getUser = get_firebase_user_promise(this.auth);
-		this.queryFn = queryFn;
+		this.queryParams = queryParams;
 	}
 
 	start() {
@@ -112,9 +121,29 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 			];
 
 			this.docRef = doc(this.firestore, ...pathArray);
-		} else if (this.queryFn) {
+		} else if (this.collectionPathFunctionOrString) {
 			// Run query and get first document ref
-			const queryRef = this.queryFn(user);
+
+			let collectionPath: string | null | undefined;
+			if (typeof this.collectionPathFunctionOrString === "function") {
+				collectionPath = this.collectionPathFunctionOrString(user);
+			} else {
+				collectionPath = this.collectionPathFunctionOrString;
+			}
+
+			if (!collectionPath || !this.queryParams) {
+				throw new Error(
+					`"collectionPath" and "query" options must be defined.`
+				);
+			}
+
+			console.log("DocumentState.svelte | collectionPath", collectionPath);
+
+			const queryRef = query(
+				collection(this.firestore, collectionPath),
+				...this.queryParams(user),
+				limit(1)
+			);
 
 			if (!queryRef) {
 				this.docRef = undefined;
@@ -123,6 +152,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 
 			this.queryRef = queryRef;
 			const querySnapshot = await getDocs(queryRef);
+			console.log("DocumentState.svelte | querySnapshot", querySnapshot.docs);
 			this.docRef = querySnapshot.docs[0]?.ref;
 		}
 

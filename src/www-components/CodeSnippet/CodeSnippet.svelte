@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { codeToHtml } from "shiki";
 	import { onMount } from "svelte";
+	import {
+		removeStyleTags,
+		replaceTabsBySpaces
+	} from "../../www-lib/string.helpers.js";
 
 	type Props = {
 		code: string;
@@ -9,10 +13,20 @@
 
 	let { code, language = "svelte" }: Props = $props();
 
+	let codeFormatted = $derived.by(() => {
+		let s = replaceTabsBySpaces(code);
+		s = s.replace(
+			`"$lib/CollectionState.svelte.js"`,
+			`"svelte-firebase-state"`
+		);
+		s = removeStyleTags(s);
+		return s;
+	});
+
 	let html: string | undefined = $state(undefined);
 
 	onMount(async () => {
-		html = await codeToHtml(code, {
+		html = await codeToHtml(codeFormatted, {
 			lang: language,
 			theme: "github-dark-default"
 		});

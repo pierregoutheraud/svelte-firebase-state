@@ -8,11 +8,9 @@
 		firestore,
 		listen: true,
 		// path: "users/rXY7P670aVJiqrrsyw8z"
+		collectionPath: "users_2",
 		query: (u) => {
-			return query(
-				collection(firestore, "users"),
-				where("name", "==", "Pierre")
-			);
+			return [where("name", "==", "Anna")];
 		}
 	});
 

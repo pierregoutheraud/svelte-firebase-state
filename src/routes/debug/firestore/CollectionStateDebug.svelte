@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { collection, query } from "firebase/firestore";
-	import { firestore } from "../firebase.js";
 	import { type FirestoreUser } from "./states.svelte.js";
 	import { CollectionState } from "$lib/CollectionState.svelte.js";
+	import { firestore } from "../../../www-lib/firebase.js";
 
 	const firestoreUsersState = new CollectionState<FirestoreUser>({
 		firestore,
 		listen: true,
-		// path: async (u) => "users"
-		query: async () => {
-			return query(collection(firestore, "users"));
-		}
+		path: () => "users"
 	});
 
 	let name = $state("John");
@@ -31,7 +28,7 @@
 		// ];
 	}
 
-	function handleRemove(user: FirestoreUser) {
+	function handleRemove(user: FirestoreUser & { id: string }) {
 		firestoreUsersState.delete(user.id);
 	}
 

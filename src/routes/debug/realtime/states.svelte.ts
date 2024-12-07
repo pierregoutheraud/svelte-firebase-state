@@ -1,6 +1,6 @@
 import { NodeListState } from "$lib/NodeListState.svelte.js";
 import { NodeState } from "$lib/NodeState.svelte.js";
-import { rdb } from "../../../www-lib/firebase.js";
+import { database } from "../../../www-lib/firebase.js";
 
 export interface RealtimeUser {
 	id: string;
@@ -9,11 +9,11 @@ export interface RealtimeUser {
 }
 
 export const user = new NodeState<RealtimeUser>({
-	database: rdb,
+	database: database,
 	path: async () => "users/1"
 });
 
 export const users = new NodeListState<RealtimeUser>({
-	database: rdb,
+	database: database,
 	path: async () => "users"
 });

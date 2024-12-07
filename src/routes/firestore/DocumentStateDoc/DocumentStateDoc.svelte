@@ -24,45 +24,26 @@ const user = new DocumentState<User>({
 
 <CodeSnippet
 	language="typescript"
-	code={`type PathParam =
-	| string
-	| null
-	| undefined
-	| ((user: User | null) => string | null | undefined);
+	code={`// DocumentState Options
 
-type QueryParamsFn = (user: User | null) => QueryConstraint[];
+// The firebase auth instance (optional)
+// In case you want to use the current user in the path
+auth?: Auth;
 
-type DocumentStateOptionsBase = {
-  // The firebase auth instance (optional)
-	auth?: Auth;
+// The firebase firestore instance
+firestore: Firestore;
 
-  // The firebase firestore instance
-	firestore: Firestore;
+// Listen for real-time updates (optional - default: false)
+listen?: boolean;
 
-  // Listen for real-time updates (optional - default: false)
-	listen?: boolean;
-};
+// The path to the document (optional)
+path?: PathParam;
 
-type DocumentStateOptions = DocumentStateOptionsBase &
-	(
-		| {
-				path?: never;
+// The path to the collection (optional)
+collectionPath?: PathParam;
 
-        // The path to the collection (optional - Example below)
-				collectionPath?: PathParam;
-        
-        // The query constraints (optional - Example below)
-				query?: QueryParamsFn;
-		  }
-		| {
-        // The path to the document
-				path?: PathParam;
-
-				collectionPath?: never;
-				query?: never;
-		  }
-	);
-`}
+// The query constraints (optional)
+query?: QueryParamsFn;`}
 />
 
 <Example

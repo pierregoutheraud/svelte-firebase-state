@@ -5,75 +5,69 @@ import {
 	onValue,
 	type Unsubscribe,
 	type DatabaseReference,
-	set
+	QueryConstraint,
+	query
 } from "firebase/database";
 import { get_firebase_user_promise } from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
-import { SvelteMap } from "svelte/reactivity";
 
 interface CreateNodeStateOptions {
 	auth?: Auth;
 	database: Database;
 	path: (user: User | null) => Promise<string>;
 	autosave?: boolean;
+	listen?: boolean;
+	query?: (user: User | null) => QueryConstraint[];
 }
 
-export class NodeListState<T> extends SubscriberState<Record<string, T>> {
+export class NodeListState<T> extends SubscriberState<T[]> {
+	private readonly auth?: Auth;
+	private readonly database: Database;
+	private readonly path: (user: User | null) => Promise<string>;
+	private readonly autosave: boolean;
+	private readonly listen: boolean;
+	private readonly queryParamsFn?: (user: User | null) => QueryConstraint[];
+
 	private unsub?: Unsubscribe;
 	private listRef?: DatabaseReference;
 	private readonly getUser: Promise<User | null>;
 
-	// private _list: T[] = $state([]);
-	// private _map: Map<string, T> = $state(new Map());
-	derived = $derived(this.value ? this.value : {});
-
-	constructor(private options: CreateNodeStateOptions) {
+	constructor({
+		auth,
+		database,
+		path,
+		autosave = false,
+		listen = false,
+		query: queryParamsFn
+	}: CreateNodeStateOptions) {
 		super();
-		this.getUser = get_firebase_user_promise(options.auth);
-		// this.initialize_effects();
+
+		this.auth = auth;
+		this.database = database;
+		this.path = path;
+		this.autosave = autosave;
+		this.listen = listen;
+		this.queryParamsFn = queryParamsFn;
+
+		this.getUser = get_firebase_user_promise(auth);
 	}
-
-	// private initialize_effects(): () => void {
-	// 	return $effect.root(() => {
-	// 		// $derived does not work, so I use $state + $effect
-	// 		$effect(() => {
-	// 			this._map = this.value
-	// 				? new Map(Object.entries(this.value))
-	// 				: new Map();
-	// 			this._list = this.value ? Object.values(this.value) : [];
-	// 		});
-	// 	});
-	// }
-
-	// get list(): T[] {
-	// 	return this._list;
-	// }
-	//
-	// get map(): Map<string, T> {
-	// 	return this._map;
-	// }
 
 	async start() {
 		const user = await this.getUser;
-		const pathStr = await this.options.path(user);
-		this.listRef = ref(this.options.database, pathStr);
-		this.unsub = onValue(this.listRef, (snapshot) => {
-			this.value = snapshot.val();
+		const pathStr = await this.path(user);
+		this.listRef = ref(this.database, pathStr);
+		const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
+		const queryRef = query(this.listRef, ...queryParams);
 
-			// const data = snapshot.toJSON() as Record<string, T> | null;
-			// if (!data) {
-			// 	this.value = new SvelteMap();
-			// 	return;
-			// }
-			// this.value = new SvelteMap(Object.entries(data));
+		this.unsub = onValue(queryRef, (snapshot) => {
+			const arr: T[] = [];
+			snapshot.forEach((childSnapshot) => {
+				// const childKey = childSnapshot.key;
+				const childData = childSnapshot.val() as T;
+				arr.push(childData);
+			});
 
-			// const newList: T[] = [];
-			// snapshot.forEach((childSnapshot) => {
-			// 	// const childKey = childSnapshot.key;
-			// 	const childData = childSnapshot.val();
-			// 	newList.push(childData);
-			// });
-			// this.value = newList;
+			this.value = arr;
 		});
 	}
 
@@ -82,27 +76,13 @@ export class NodeListState<T> extends SubscriberState<Record<string, T>> {
 		this.unsub = undefined;
 	}
 
-	get data(): Map<string, T> | undefined {
+	get data(): T[] | null | undefined {
 		return this.value;
 	}
 
-	get array(): T[] {
-		return this.list;
+	set data(data: T[] | undefined) {
+		this.value = data;
 	}
-
-	// set data(newValue: T[] | undefined) {
-	// 	this.value = newValue;
-	// 	if (this.options.autosave) {
-	// 		this.save_data_to_firebase();
-	// 	}
-	// }
-
-	// private save_data_to_firebase() {
-	// 	if (!this.listRef || !this.value) {
-	// 		return;
-	// 	}
-	// 	set(this.listRef, this.value);
-	// }
 
 	public dispose(): void {
 		this.stop();

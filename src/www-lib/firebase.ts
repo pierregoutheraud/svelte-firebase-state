@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Realtime Database and get a reference to the service
-const rdb = getDatabase(app);
+const database = getDatabase(app);
 const firestore = getFirestore(app);
 
-export { rdb, firestore };
+export { database, firestore };

@@ -22,22 +22,23 @@
 />
 <CodeSnippet
 	language="typescript"
-	code={`type CollectionStateOptions = {
-  // The firebase auth instance (optional)
-  auth?: Auth;
+	code={`// CollectionState Options
 
-  // The firebase firestore instance
-  firestore: Firestore;
+// The firebase auth instance (optional)
+// In case you want to use the current user in the path
+auth?: Auth;
 
-  // The path to the collection
-  path: string | ((currentUser: User | null) => string);
+// The firebase firestore instance
+firestore: Firestore;
 
-  // The query constraints (optional)
-  query?: (currentUser: User | null) => QueryConstraint[];
+// The path to the collection
+path: string | ((currentUser: User | null) => string);
 
-  // Listen for real-time updates (optional - default: false)
-  listen?: boolean;
-};`}
+// The query constraints (optional)
+query?: (currentUser: User | null) => QueryConstraint[];
+
+// Listen for real-time updates (optional - default: false)
+listen?: boolean;`}
 />
 
 <Example text="Example: Listen to a collection" code={CollectionStateDemo1Code}>

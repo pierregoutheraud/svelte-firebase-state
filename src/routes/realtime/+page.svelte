@@ -2,6 +2,7 @@
 	import Nav from "../../www-components/Nav/Nav.svelte";
 	import NavItem from "../../www-components/Nav/NavItem.svelte";
 	import NodeListStateDoc from "./NodeListStateDoc/NodeListStateDoc.svelte";
+	import NodeStateDoc from "./NodeStateDoc/NodeStateDoc.svelte";
 
 	let sectionDisplayed: 1 | 2 = $state(1);
 </script>
@@ -26,7 +27,7 @@
 		{#if sectionDisplayed === 1}
 			<NodeListStateDoc />
 		{:else}
-			<!-- <NodeStateDoc /> -->
+			<NodeStateDoc />
 		{/if}
 	</div>
 </div>

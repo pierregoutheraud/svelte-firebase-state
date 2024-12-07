@@ -14,7 +14,7 @@
 	language="typescript"
 	code={`const users = new NodeListState<User>({
   database,
-  path: async () => "users"
+  path: "users"
 });`}
 />
 <CodeSnippet

@@ -31,7 +31,7 @@
 
 	export const messages = new NodeListState<Message>({
 		database,
-		path: async () => "messages",
+		path: "messages",
 		query: () => [orderByChild("timestamp"), limitToLast(5)],
 		listen: true
 	});
@@ -49,8 +49,6 @@
 
 		text = "";
 	}
-
-	$inspect(messages.data);
 </script>
 
 <div class="demo">

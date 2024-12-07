@@ -6,69 +6,104 @@ import {
 	type Unsubscribe,
 	type DatabaseReference,
 	QueryConstraint,
-	query
+	query,
+	type Query,
+	get,
+	DataSnapshot
 } from "firebase/database";
 import { get_firebase_user_promise } from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
 
+type PathFunctionOrString = ((user: User | null) => string) | string;
+
 interface CreateNodeStateOptions {
 	auth?: Auth;
 	database: Database;
-	path: (user: User | null) => Promise<string>;
-	autosave?: boolean;
-	listen?: boolean;
+	path: PathFunctionOrString;
 	query?: (user: User | null) => QueryConstraint[];
+	listen?: boolean;
 }
 
 export class NodeListState<T> extends SubscriberState<T[]> {
 	private readonly auth?: Auth;
 	private readonly database: Database;
-	private readonly path: (user: User | null) => Promise<string>;
-	private readonly autosave: boolean;
-	private readonly listen: boolean;
+	private readonly pathFunctionOrString: PathFunctionOrString;
+	private readonly listenAtStart: boolean;
 	private readonly queryParamsFn?: (user: User | null) => QueryConstraint[];
 
 	private unsub?: Unsubscribe;
 	private listRef?: DatabaseReference;
 	private readonly getUser: Promise<User | null>;
+	private queryRef?: Query;
 
 	constructor({
 		auth,
 		database,
-		path,
-		autosave = false,
-		listen = false,
+		path: pathFunctionOrString,
+		listen: listenAtStart = false,
 		query: queryParamsFn
 	}: CreateNodeStateOptions) {
 		super();
 
 		this.auth = auth;
 		this.database = database;
-		this.path = path;
-		this.autosave = autosave;
-		this.listen = listen;
+		this.pathFunctionOrString = pathFunctionOrString;
+		this.listenAtStart = listenAtStart;
 		this.queryParamsFn = queryParamsFn;
-
-		this.getUser = get_firebase_user_promise(auth);
+		this.getUser = get_firebase_user_promise(this.auth);
 	}
 
 	async start() {
 		const user = await this.getUser;
-		const pathStr = await this.path(user);
+
+		let pathStr: string;
+		if (typeof this.pathFunctionOrString === "function") {
+			pathStr = this.pathFunctionOrString(user);
+		} else {
+			pathStr = this.pathFunctionOrString;
+		}
+
 		this.listRef = ref(this.database, pathStr);
 		const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
-		const queryRef = query(this.listRef, ...queryParams);
+		this.queryRef = query(this.listRef, ...queryParams);
 
-		this.unsub = onValue(queryRef, (snapshot) => {
-			const arr: T[] = [];
-			snapshot.forEach((childSnapshot) => {
-				// const childKey = childSnapshot.key;
-				const childData = childSnapshot.val() as T;
-				arr.push(childData);
-			});
+		if (this.listenAtStart) {
+			this.listen();
+		} else {
+			this.fetch_data();
+		}
+	}
 
-			this.value = arr;
+	createArrayFromSnapshot(snapshot: DataSnapshot) {
+		const arr: T[] = [];
+		snapshot.forEach((childSnapshot) => {
+			// const childKey = childSnapshot.key;
+			const childData = childSnapshot.val() as T;
+			arr.push(childData);
 		});
+		return arr;
+	}
+
+	listen() {
+		if (!this.queryRef) {
+			throw new Error("Query reference is not set");
+		}
+		this.unsub = onValue(this.queryRef, (snapshot) => {
+			this.value = this.createArrayFromSnapshot(snapshot);
+		});
+	}
+
+	async fetch_data() {
+		if (!this.queryRef) {
+			throw new Error("Query reference is not set");
+		}
+
+		const snapshot = await get(this.queryRef);
+		this.value = this.createArrayFromSnapshot(snapshot);
+	}
+
+	refetch(): Promise<void> {
+		return this.fetch_data();
 	}
 
 	stop(): void {

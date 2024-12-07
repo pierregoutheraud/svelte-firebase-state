@@ -31,8 +31,6 @@
 	function handleRemove(user: FirestoreUser & { id: string }) {
 		firestoreUsersState.delete(user.id);
 	}
-
-	$inspect(firestoreUsersState.data);
 </script>
 
 <div class="users">

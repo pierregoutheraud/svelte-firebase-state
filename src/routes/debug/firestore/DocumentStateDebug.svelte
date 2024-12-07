@@ -14,8 +14,6 @@
 		}
 	});
 
-	$inspect(user.data);
-
 	function onclick() {
 		if (user.data) {
 			user.data.age++;

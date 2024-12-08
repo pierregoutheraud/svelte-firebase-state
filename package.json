@@ -1,6 +1,6 @@
 {
   "name": "svelte-firebase-state",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite dev",
     "lib:build": "vite build --mode library && pnpm run package",

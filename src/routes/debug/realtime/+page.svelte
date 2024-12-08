@@ -3,14 +3,13 @@
   import { NodeListState } from "$lib/NodeListState.svelte.js";
   import { ChildState, ParentState } from "$lib/test.svelte.js";
   import { database } from "../../../www-lib/firebase.js";
-  import { user, type RealtimeUser } from "./states.svelte.js";
 
   export const users = new NodeListState<RealtimeUser>({
     database: database,
     path: async () => "users"
   });
 
-  const user2 = new NodeState<RealtimeUser>({
+  const user = new NodeState<RealtimeUser>({
     database: database,
     path: async () => "users/2",
     autosave: true

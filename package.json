@@ -1,6 +1,6 @@
 {
   "name": "svelte-firebase-state",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "dev": "vite dev",
     "lib:build": "vite build --mode library && pnpm run package",
@@ -11,7 +11,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
-    "lint": "prettier --check . && eslint .",
+    "lint": "prettier --check ./src && eslint ./src",
     "test:unit": "vitest",
     "test": "pnpm run test:unit -- --run"
   },

@@ -8,7 +8,7 @@ import {
   set,
   get
 } from "firebase/database";
-import { effect_deps, get_firebase_user_promise } from "./utils.svelte.js";
+import { get_firebase_user_promise } from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
 
 type PathFunctionOrString = ((user: User | null) => string) | string;
@@ -29,8 +29,8 @@ export class NodeState<T> extends SubscriberState<T> {
   private readonly autosave: boolean;
 
   private unsub?: Unsubscribe;
-  private firstFetchDone: boolean = false;
-  private isUpdatingFromDB: boolean = true;
+  // private firstFetchDone: boolean = false;
+  // private isUpdatingFromDB: boolean = true;
   private nodeRef?: DatabaseReference;
   private readonly getUser: Promise<User | null>;
   private cleanup: () => void;

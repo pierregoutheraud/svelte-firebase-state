@@ -109,13 +109,6 @@
 		color: rgba(0, 0, 0, 0.5);
 	}
 
-	.source {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		align-items: center;
-	}
-
 	.github {
 		display: flex;
 		justify-content: center;
@@ -123,10 +116,6 @@
 		gap: 8px;
 		font-size: 16px;
 		color: black;
-	}
-	a.github span {
-		color: red;
-		text-decoration: none;
 	}
 	.github:hover {
 		text-decoration: none;

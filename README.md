@@ -1,58 +1,54 @@
-# create-svelte
+# svelte-firebase-state
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+svelte-firebase-state simplifies Firebase integration in Svelte/Sveltekit applications by providing easy-to-use reactive state classes for managing Firestore and Realtime Database data. These classes handle data fetching, live updates, user-specific queries and state management, allowing you to focus on your app's logic instead of Firebase boilerplate.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+## Usage
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+1. Install the library with your favorite package manager.
 
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+npm install svelte-firebase-state
 ```
 
-## Developing
+2. In your svelte component, import and create an instance of `CollectionState`, `DocumentState`, `NodeState`, or `NodeListState`, passing configuration options like Firestore, Authentication, query functions, or database paths.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+You can also instantiate the state class in a .svelte.ts file making it global to your app, in this case the data will be fetch only when the data is subscribed to (shown in a component or logged in a reactive environment).
 
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```typescript
+import { CollectionState } from "svelte-firebase-state";
+import { firestore, auth } from "../firebase"; // Your firebase config file
+const tasks = new CollectionState({
+	auth,
+	firestore,
+	path: (user) => `/users/${user?.uid}/tasks`,
+	listen: true
+});
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+3. Access **svelte 5** reactive state with the "data" property of the instance.
 
-## Building
+If you use the "listen" param, when your database receive updates your UI will be re-rendered with the correct data.
 
-To build your library:
-
-```bash
-npm run package
+```typescript
+// Reactive data = [task1, task2, ...]
+$inspect(tasks.data);
 ```
 
-To create a production version of your showcase app:
-
-```bash
-npm run build
+```svelte
+{#each tasks.data as task (task.id)}
+	<p>{task.name}</p>
+{/each}
 ```
 
-You can preview the production build with `npm run preview`.
+4. Perform CRUD Operations using class methods.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```bash
-npm publish
+```svelte
+<script>
+	function handleAdd(newTask) {
+		tasks.add(newTask);
+	}
+	function handleDelete(taskId) {
+		tasks.delete(taskId);
+	}
+</script>
 ```

@@ -1,7 +1,7 @@
 import { SubscriberState } from "./SubscriberState.svelte.js";
 
 export class ParentState {
-	value = $state(1);
+  value = $state(1);
 }
 
 // export class ChildState extends ParentState {
@@ -9,15 +9,15 @@ export class ParentState {
 // }
 //
 export class ChildState extends SubscriberState<number> {
-	derived = $derived(this.value ? this.value * 2 : 0);
+  derived = $derived(this.value ? this.value * 2 : 0);
 
-	constructor() {
-		super(0);
-	}
+  constructor() {
+    super(0);
+  }
 
-	start() {
-		// this.value = 9;
-	}
+  start() {
+    // this.value = 9;
+  }
 
-	stop() {}
+  stop() {}
 }

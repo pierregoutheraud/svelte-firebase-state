@@ -1,95 +1,95 @@
 :root {
-	--red-1: #dd2c00;
-	--red-2: #b82500;
-	--red-3: #521000;
-	--yellow-1: #ffc401;
-	--yellow-2: #ff9101;
-	--gray: #fbf6f4;
-	--gray-2: #fbf3ef;
-	--gray-3: #f7e7de;
-	--gray-4: #f2d9c9;
-	--gray-5: #e9c9b7;
-	--gray-6: #e0b9a5;
-	--gray-7: #d7a994;
-	--black: #24242e;
+  --red-1: #dd2c00;
+  --red-2: #b82500;
+  --red-3: #521000;
+  --yellow-1: #ffc401;
+  --yellow-2: #ff9101;
+  --gray: #fbf6f4;
+  --gray-2: #fbf3ef;
+  --gray-3: #f7e7de;
+  --gray-4: #f2d9c9;
+  --gray-5: #e9c9b7;
+  --gray-6: #e0b9a5;
+  --gray-7: #d7a994;
+  --black: #24242e;
 }
 
 html {
-	box-sizing: border-box;
-	font-weight: 400;
-	width: 100%;
-	height: 100%;
+  box-sizing: border-box;
+  font-weight: 400;
+  width: 100%;
+  height: 100%;
 }
 
 body {
-	display: flex;
-	height: 100%;
-	width: 100%;
-	background-color: white;
-	color: black;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background-color: white;
+  color: black;
 }
 
 input,
 button,
 select,
 textarea {
-	margin: 0;
-	padding: 0;
-	border: none;
-	background: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 *,
 *:before,
 *:after {
-	box-sizing: inherit;
-	margin: 0;
-	padding: 0;
-	outline: none;
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+  outline: none;
 
-	-webkit-font-smoothing: antialiased;
-	-webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 
-	/* font-family: "Karla", sans-serif; */
-	/* font-optical-sizing: auto; */
-	/* font-weight: 400; */
-	/* font-style: normal; */
+  /* font-family: "Karla", sans-serif; */
+  /* font-optical-sizing: auto; */
+  /* font-weight: 400; */
+  /* font-style: normal; */
 
-	font-family: "JetBrains Mono", monospace;
-	font-optical-sizing: auto;
-	font-weight: 400;
-	font-style: normal;
-	font-size: 18px;
+  font-family: "JetBrains Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 18px;
 }
 
 .svelte {
-	width: 100%;
+  width: 100%;
 }
 
 h1 {
-	font-weight: 800;
+  font-weight: 800;
 }
 
 h2 {
-	font-size: 24px;
-	font-weight: 700;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 h3 {
-	font-size: 20px;
-	font-weight: 600;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 h4 {
-	font-size: 18px;
-	font-weight: 500;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 p {
-	font-size: 16px;
+  font-size: 16px;
 }
 
 p span {
-	font-size: 16px;
-	font-weight: 700;
+  font-size: 16px;
+  font-weight: 700;
 }

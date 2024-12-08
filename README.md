@@ -22,10 +22,10 @@ You can also instantiate the state class in a .svelte.ts file making it global t
 import { CollectionState } from "svelte-firebase-state";
 import { firestore, auth } from "../firebase"; // Your firebase config file
 const tasks = new CollectionState({
-	auth,
-	firestore,
-	path: (user) => `/users/${user?.uid}/tasks`,
-	listen: true
+  auth,
+  firestore,
+  path: (user) => `/users/${user?.uid}/tasks`,
+  listen: true
 });
 ```
 
@@ -40,7 +40,7 @@ $inspect(tasks.data);
 
 ```svelte
 {#each tasks.data as task (task.id)}
-	<p>{task.name}</p>
+  <p>{task.name}</p>
 {/each}
 ```
 
@@ -48,11 +48,11 @@ $inspect(tasks.data);
 
 ```svelte
 <script>
-	function handleAdd(newTask) {
-		tasks.add(newTask);
-	}
-	function handleDelete(taskId) {
-		tasks.delete(taskId);
-	}
+  function handleAdd(newTask) {
+    tasks.add(newTask);
+  }
+  function handleDelete(taskId) {
+    tasks.delete(taskId);
+  }
 </script>
 ```

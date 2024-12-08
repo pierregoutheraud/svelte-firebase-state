@@ -1,35 +1,35 @@
 <script lang="ts">
-	import Nav from "../../www-components/Nav/Nav.svelte";
-	import NavItem from "../../www-components/Nav/NavItem.svelte";
-	import NodeListStateDoc from "./NodeListStateDoc/NodeListStateDoc.svelte";
-	import NodeStateDoc from "./NodeStateDoc/NodeStateDoc.svelte";
+  import Nav from "../../www-components/Nav/Nav.svelte";
+  import NavItem from "../../www-components/Nav/NavItem.svelte";
+  import NodeListStateDoc from "./NodeListStateDoc/NodeListStateDoc.svelte";
+  import NodeStateDoc from "./NodeStateDoc/NodeStateDoc.svelte";
 
-	let sectionDisplayed: 1 | 2 = $state(1);
+  let sectionDisplayed: 1 | 2 = $state(1);
 </script>
 
 <div class="container">
-	<Nav>
-		<NavItem
-			onclick={() => (sectionDisplayed = 1)}
-			active={sectionDisplayed === 1}
-		>
-			NodeListState
-		</NavItem>
-		<NavItem
-			onclick={() => (sectionDisplayed = 2)}
-			active={sectionDisplayed === 2}
-		>
-			NodeState
-		</NavItem>
-	</Nav>
+  <Nav>
+    <NavItem
+      onclick={() => (sectionDisplayed = 1)}
+      active={sectionDisplayed === 1}
+    >
+      NodeListState
+    </NavItem>
+    <NavItem
+      onclick={() => (sectionDisplayed = 2)}
+      active={sectionDisplayed === 2}
+    >
+      NodeState
+    </NavItem>
+  </Nav>
 
-	<div class="content">
-		{#if sectionDisplayed === 1}
-			<NodeListStateDoc />
-		{:else}
-			<NodeStateDoc />
-		{/if}
-	</div>
+  <div class="content">
+    {#if sectionDisplayed === 1}
+      <NodeListStateDoc />
+    {:else}
+      <NodeStateDoc />
+    {/if}
+  </div>
 </div>
 
 <!-- <h3>Realtime Database Integration</h3> -->
@@ -58,15 +58,15 @@
 <!-- </p> -->
 
 <style>
-	.container {
-		display: flex;
-		flex-direction: column;
-	}
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
 
-	.content {
-		display: flex;
-		flex-direction: column;
-		gap: 30px;
-		padding: 40px 0;
-	}
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 40px 0;
+  }
 </style>

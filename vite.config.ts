@@ -8,21 +8,21 @@ const json = readFileSync(file, "utf8");
 const pkg = JSON.parse(json);
 
 export default defineConfig(({ mode }) => {
-	const isLibrary = mode === "library";
+  const isLibrary = mode === "library";
 
-	return {
-		plugins: [sveltekit()],
-		test: {
-			include: ["src/**/*.{test,spec}.{js,ts}"]
-		},
-		build: {
-			rollupOptions: {
-				// Only apply externals for library build
-				external: isLibrary ? ["svelte", "firebase"] : []
-			}
-		},
-		define: {
-			PKG: pkg
-		}
-	};
+  return {
+    plugins: [sveltekit()],
+    test: {
+      include: ["src/**/*.{test,spec}.{js,ts}"]
+    },
+    build: {
+      rollupOptions: {
+        // Only apply externals for library build
+        external: isLibrary ? ["svelte", "firebase"] : []
+      }
+    },
+    define: {
+      PKG: pkg
+    }
+  };
 });

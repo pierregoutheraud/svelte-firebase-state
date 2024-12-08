@@ -1,20 +1,20 @@
 <script lang="ts">
-	import CodeSnippet from "../../../www-components/CodeSnippet/CodeSnippet.svelte";
-	import Example from "../../../www-components/Example/Example.svelte";
-	import DocumentStateDemo1 from "./DocumentStateDemo1.svelte";
-	import DocumentStateDemo1Code from "./DocumentStateDemo1.svelte?raw";
-	import DocumentStateDemo2 from "./DocumentStateDemo2.svelte";
-	import DocumentStateDemo2Code from "./DocumentStateDemo2.svelte?raw";
+  import CodeSnippet from "../../../www-components/CodeSnippet/CodeSnippet.svelte";
+  import Example from "../../../www-components/Example/Example.svelte";
+  import DocumentStateDemo1 from "./DocumentStateDemo1.svelte";
+  import DocumentStateDemo1Code from "./DocumentStateDemo1.svelte?raw";
+  import DocumentStateDemo2 from "./DocumentStateDemo2.svelte";
+  import DocumentStateDemo2Code from "./DocumentStateDemo2.svelte?raw";
 </script>
 
 <p>
-	<span>DocumentState</span> -> Manages a single Firestore document.<br />Fetch
-	data, listen for real-time updates and save changes to Firebase.
+  <span>DocumentState</span> -> Manages a single Firestore document.<br />Fetch
+  data, listen for real-time updates and save changes to Firebase.
 </p>
 
 <CodeSnippet
-	language="typescript"
-	code={`
+  language="typescript"
+  code={`
 const user = new DocumentState<User>({
   firestore,
 	listen: true,
@@ -23,8 +23,8 @@ const user = new DocumentState<User>({
 />
 
 <CodeSnippet
-	language="typescript"
-	code={`// DocumentState Options
+  language="typescript"
+  code={`// DocumentState Options
 
 // The firebase auth instance (optional)
 // In case you want to use the current user in the path
@@ -47,15 +47,15 @@ query?: QueryParamsFn;`}
 />
 
 <Example
-	text="Example: Fetch a document & listen for changes"
-	code={DocumentStateDemo2Code}
+  text="Example: Fetch a document & listen for changes"
+  code={DocumentStateDemo2Code}
 >
-	<DocumentStateDemo2 />
+  <DocumentStateDemo2 />
 </Example>
 
 <Example
-	text="Example: Query a document in a collection"
-	code={DocumentStateDemo1Code}
+  text="Example: Query a document in a collection"
+  code={DocumentStateDemo1Code}
 >
-	<DocumentStateDemo1 />
+  <DocumentStateDemo1 />
 </Example>

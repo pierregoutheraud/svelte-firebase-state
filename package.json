@@ -3,7 +3,8 @@
 	"version": "0.0.7",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build && pnpm run package",
+		"lib:build": "vite build --mode library && pnpm run package",
+		"build": "vite build --mode production",
 		"preview": "vite preview",
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "pnpm run package",
@@ -37,7 +38,8 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/adapter-vercel": "^5.5.0",
+		"@sveltejs/kit": "^2.9.0",
 		"@sveltejs/package": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
 		"eslint": "^9.7.0",

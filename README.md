@@ -1,3 +1,7 @@
+# Documentation
+
+https://svelte-firebase-state.vercel.app/
+
 # svelte-firebase-state
 
 svelte-firebase-state simplifies Firebase integration in Svelte/Sveltekit applications by providing easy-to-use reactive state classes for managing Firestore and Realtime Database data. These classes handle data fetching, live updates, user-specific queries and state management, allowing you to focus on your app's logic instead of Firebase boilerplate.

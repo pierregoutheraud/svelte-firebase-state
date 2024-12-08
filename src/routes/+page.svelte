@@ -28,8 +28,8 @@
     <br />
     <br />
     You can also instantiate the state class in a .svelte.ts file making it global
-    to your app, in this case the data will be fetch only when the data is subscribed
-    to (shown in a component or logged in a reactive environment).
+    to your app, in this case the data will be fetched only when the data is subscribed
+    to (shown in a component ui or used in a reactive environment like $effect).
   </p>
 
   <CodeSnippet

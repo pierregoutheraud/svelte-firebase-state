@@ -12,12 +12,6 @@
   let { children }: Props = $props();
   let stars = $state(0);
 
-  const routes = [
-    { name: "What is it?", pathname: "/" },
-    { name: "Firestore", pathname: "/firestore" },
-    { name: "Realtime Database", pathname: "/realtime" }
-  ];
-
   async function fetchStars() {
     const res = await fetch(
       "https://api.github.com/repos/pierregoutheraud/svelte-firebase-state"
@@ -53,14 +47,21 @@
 
   <section class="docs">
     <Nav>
-      {#each routes as route}
-        <NavItem
-          href={route.pathname}
-          active={$page.url.pathname === route.pathname}
-        >
-          {route.name}
-        </NavItem>
-      {/each}
+      <NavItem href={"/"} active={$page.url.pathname === "/"}>
+        What is it?
+      </NavItem>
+      <NavItem
+        href="/firestore/collection-state"
+        active={$page.url.pathname.includes("/firestore")}
+      >
+        Firestore
+      </NavItem>
+      <NavItem
+        href="/realtime/node-list-state"
+        active={$page.url.pathname.includes("/realtime")}
+      >
+        Realtime Database
+      </NavItem>
     </Nav>
 
     {@render children()}

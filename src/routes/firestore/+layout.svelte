@@ -1,34 +1,31 @@
 <script lang="ts">
+  import { page } from "$app/stores";
+  import type { Snippet } from "svelte";
   import Nav from "../../www-components/Nav/Nav.svelte";
   import NavItem from "../../www-components/Nav/NavItem.svelte";
-  import CollectionStateDoc from "./CollectionStateDoc/CollectionStateDoc.svelte";
-  import DocumentStateDoc from "./DocumentStateDoc/DocumentStateDoc.svelte";
 
-  let sectionDisplayed: 1 | 2 = $state(1);
+  type Props = { children: Snippet };
+  let { children }: Props = $props();
 </script>
 
 <div class="container">
   <Nav>
     <NavItem
-      onclick={() => (sectionDisplayed = 1)}
-      active={sectionDisplayed === 1}
+      href="/firestore/collection-state"
+      active={$page.url.pathname === "/firestore/collection-state"}
     >
       CollectionState
     </NavItem>
     <NavItem
-      onclick={() => (sectionDisplayed = 2)}
-      active={sectionDisplayed === 2}
+      href="/firestore/document-state"
+      active={$page.url.pathname === "/firestore/document-state"}
     >
       DocumentState
     </NavItem>
   </Nav>
 
   <div class="content">
-    {#if sectionDisplayed === 1}
-      <CollectionStateDoc />
-    {:else}
-      <DocumentStateDoc />
-    {/if}
+    {@render children()}
   </div>
 </div>
 

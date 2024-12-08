@@ -137,8 +137,6 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
         );
       }
 
-      console.log("DocumentState.svelte | collectionPath", collectionPath);
-
       const queryRef = query(
         collection(this.firestore, collectionPath),
         ...this.queryParams(user),
@@ -152,7 +150,6 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
 
       this.queryRef = queryRef;
       const querySnapshot = await getDocs(queryRef);
-      console.log("DocumentState.svelte | querySnapshot", querySnapshot.docs);
       this.docRef = querySnapshot.docs[0]?.ref;
     }
 

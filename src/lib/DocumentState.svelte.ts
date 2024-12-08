@@ -16,7 +16,10 @@ import {
   limit
 } from "firebase/firestore";
 import { type Auth } from "firebase/auth";
-import { get_firebase_user_promise } from "./utils.svelte.js";
+import {
+  genericIdConverter,
+  get_firebase_user_promise
+} from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
 
 type DocumentStateOptionsBase = {
@@ -47,7 +50,10 @@ type DocumentStateOptions = DocumentStateOptionsBase &
       }
   );
 
-export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
+export class DocumentState<
+  T extends DocumentData,
+  TConverted extends T & { id: string } = T & { id: string }
+> extends SubscriberState<TConverted | null> {
   private docRef: DocumentReference | undefined;
   private unsub: Unsubscribe | undefined;
   private loading = $state(false);
@@ -120,7 +126,9 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
         ...string[]
       ];
 
-      this.docRef = doc(this.firestore, ...pathArray);
+      this.docRef = doc(this.firestore, ...pathArray).withConverter(
+        genericIdConverter<T, TConverted>()
+      );
     } else if (this.collectionPathFunctionOrString) {
       // Run query and get first document ref
 
@@ -170,7 +178,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
     if (!docSnap.exists()) {
       this.value = null;
     } else {
-      this.value = docSnap.data() as T;
+      this.value = docSnap.data() as TConverted;
     }
 
     this.loading = false;
@@ -227,7 +235,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
         this.listen_to_query();
         return;
       }
-      const newData = docSnap.data() as T;
+      const newData = docSnap.data() as TConverted;
       this.value = newData;
     });
 
@@ -249,11 +257,11 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
     return setDoc(this.docRef, this.value || null, { merge: true });
   }
 
-  get data(): T | null | undefined {
+  get data(): TConverted | null | undefined {
     return this.value;
   }
 
-  set data(data: T | null | undefined) {
+  set data(data: TConverted | null) {
     this.value = data;
   }
 
@@ -278,7 +286,7 @@ export class DocumentState<T = DocumentData> extends SubscriberState<T | null> {
       newValue = update;
     }
 
-    this.value[key] = newValue as NonNullable<T>[K];
+    this.value[key] = newValue as NonNullable<TConverted>[K];
 
     this.save_data_to_firebase();
   }

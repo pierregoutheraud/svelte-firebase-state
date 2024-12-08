@@ -1,13 +1,12 @@
 <script lang="ts">
   import { DocumentState } from "$lib/DocumentState.svelte.js";
-  import { collection, query, where } from "firebase/firestore";
+  import { where } from "firebase/firestore";
   import { type FirestoreUser } from "./states.svelte.js";
   import { firestore } from "../../../www-lib/firebase.js";
 
   const user = new DocumentState<FirestoreUser>({
     firestore,
     listen: true,
-    // path: "users/rXY7P670aVJiqrrsyw8z"
     collectionPath: "users_2",
     query: (u) => {
       return [where("name", "==", "Anna")];

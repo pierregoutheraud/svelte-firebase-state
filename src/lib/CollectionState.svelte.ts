@@ -34,7 +34,7 @@ type CollectionStateOptions = {
 export class CollectionState<
   T extends DocumentData,
   TConverted extends T & { id: string } = T & { id: string }
-> extends SubscriberState<TConverted[]> {
+> extends SubscriberState<TConverted[] | null> {
   private queryRef: Query | undefined;
   private unsub: Unsubscribe | undefined;
   private loading = $state(false);

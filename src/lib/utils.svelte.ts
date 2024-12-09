@@ -40,14 +40,16 @@ export async function get_firebase_user_promise(
 }
 
 export const genericIdConverter = <
-  T extends DocumentData,
-  TConverted
->(): FirestoreDataConverter<TConverted> => ({
-  toFirestore: (data: WithFieldValue<any>) => data,
-  fromFirestore: (snap: QueryDocumentSnapshot): TConverted => {
+  DataDb extends DocumentData,
+  DataApp extends DocumentData
+>(): FirestoreDataConverter<DataApp, DataDb> => ({
+  toFirestore: (data: WithFieldValue<DataApp>): WithFieldValue<DataDb> =>
+    data as DataDb,
+  fromFirestore: (snap: QueryDocumentSnapshot<DataApp, DataDb>): DataApp => {
+    console.log("from firestore", snap);
     return {
       id: snap.id,
       ...snap.data()
-    } as unknown as TConverted;
+    } as unknown as DataApp;
   }
 });

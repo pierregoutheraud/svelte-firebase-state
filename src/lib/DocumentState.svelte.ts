@@ -13,19 +13,37 @@ import {
   collection,
   query,
   QueryConstraint,
-  limit
+  limit,
+  QueryDocumentSnapshot,
+  type SnapshotOptions,
+  type FirestoreDataConverter,
+  type WithFieldValue
 } from "firebase/firestore";
 import { type Auth } from "firebase/auth";
-import {
-  genericIdConverter,
-  get_firebase_user_promise
-} from "./utils.svelte.js";
+import { get_firebase_user_promise } from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
 
-type DocumentStateOptionsBase = {
+type FromFirestore<
+  DataApp extends DocumentData,
+  DataDb extends DocumentData
+> = (
+  snapshot: QueryDocumentSnapshot<DataApp, DataDb>,
+  options?: SnapshotOptions
+) => DataApp;
+
+type ToFirestore<DataApp extends DocumentData, DataDb extends DocumentData> = (
+  data: DataApp
+) => DataDb;
+
+type DocumentStateOptionsBase<
+  DataDb extends DocumentData,
+  DataApp extends DocumentData
+> = {
   auth?: Auth;
   firestore: Firestore;
   listen?: boolean;
+  fromFirestore?: FromFirestore<DataApp, DataDb>;
+  toFirestore?: ToFirestore<DataApp, DataDb>;
 };
 
 type PathParam =
@@ -36,7 +54,10 @@ type PathParam =
 
 type QueryParamsFn = (user: User | null) => QueryConstraint[];
 
-type DocumentStateOptions = DocumentStateOptionsBase &
+type DocumentStateOptions<
+  DataDb extends DocumentData,
+  DataApp extends DocumentData
+> = DocumentStateOptionsBase<DataDb, DataApp> &
   (
     | {
         path?: never;
@@ -51,9 +72,9 @@ type DocumentStateOptions = DocumentStateOptionsBase &
   );
 
 export class DocumentState<
-  T extends DocumentData,
-  TConverted extends T & { id: string } = T & { id: string }
-> extends SubscriberState<TConverted | null> {
+  DataDb extends DocumentData,
+  DataApp extends DataDb & { id: string } = DataDb & { id: string }
+> extends SubscriberState<DataApp | null> {
   private docRef: DocumentReference | undefined;
   private unsub: Unsubscribe | undefined;
   private loading = $state(false);
@@ -66,6 +87,9 @@ export class DocumentState<
   private readonly listenAtStart: boolean;
   private readonly getUser: Promise<User | null>;
   private readonly queryParams?: QueryParamsFn;
+  private readonly fromFirestore?: FromFirestore<DataApp, DataDb>;
+  private readonly toFirestore?: ToFirestore<DataApp, DataDb>;
+  private readonly converter: FirestoreDataConverter<DataApp, DataDb>;
 
   constructor({
     auth,
@@ -73,8 +97,10 @@ export class DocumentState<
     path: pathFunctionOrString,
     collectionPath: collectionPathFunctionOrString,
     query: queryParams,
-    listen: listenAtStart = false
-  }: DocumentStateOptions) {
+    listen: listenAtStart = false,
+    fromFirestore,
+    toFirestore
+  }: DocumentStateOptions<DataDb, DataApp>) {
     super();
 
     this.auth = auth;
@@ -84,6 +110,23 @@ export class DocumentState<
     this.listenAtStart = listenAtStart;
     this.getUser = get_firebase_user_promise(this.auth);
     this.queryParams = queryParams;
+    this.fromFirestore = fromFirestore;
+    this.toFirestore = toFirestore;
+
+    const defaultFromFirestore: FromFirestore<DataApp, DataDb> = (snap) => ({
+      ...snap.data(),
+      id: snap.id
+    });
+
+    const defaultToFirestore: ToFirestore<DataApp, DataDb> = (data) => {
+      const { id, ...rest } = data;
+      return rest as unknown as DataDb;
+    };
+
+    this.converter = {
+      toFirestore: this.toFirestore ?? defaultToFirestore,
+      fromFirestore: this.fromFirestore ?? defaultFromFirestore
+    };
   }
 
   start() {
@@ -127,7 +170,7 @@ export class DocumentState<
       ];
 
       this.docRef = doc(this.firestore, ...pathArray).withConverter(
-        genericIdConverter<T, TConverted>()
+        this.converter
       );
     } else if (this.collectionPathFunctionOrString) {
       // Run query and get first document ref
@@ -158,7 +201,7 @@ export class DocumentState<
 
       this.queryRef = queryRef;
       const querySnapshot = await getDocs(queryRef);
-      this.docRef = querySnapshot.docs[0]?.ref;
+      this.docRef = querySnapshot.docs[0]?.ref.withConverter(this.converter);
     }
 
     return this.docRef;
@@ -178,7 +221,7 @@ export class DocumentState<
     if (!docSnap.exists()) {
       this.value = null;
     } else {
-      this.value = docSnap.data() as TConverted;
+      this.value = docSnap.data() as DataApp;
     }
 
     this.loading = false;
@@ -235,7 +278,9 @@ export class DocumentState<
         this.listen_to_query();
         return;
       }
-      const newData = docSnap.data() as TConverted;
+      const newData = docSnap.data() as DataApp;
+      // TODO: Check if the data we receive is the same as the one we have
+      // in this case we don't need to update the value
       this.value = newData;
     });
 
@@ -257,17 +302,21 @@ export class DocumentState<
     return setDoc(this.docRef, this.value || null, { merge: true });
   }
 
-  get data(): TConverted | null | undefined {
+  get data(): DataApp | null | undefined {
     return this.value;
   }
 
-  set data(data: TConverted | null) {
+  set data(data: DataApp | null) {
     this.value = data;
   }
 
-  public save<K extends keyof T>(
+  // public save() {
+  //   console.log("SAVE");
+  // }
+
+  public save<K extends keyof DataApp>(
     key?: K,
-    update?: T[K] | ((prevValue: T[K]) => T[K])
+    update?: DataApp[K] | ((prevValue: DataApp[K]) => DataApp[K])
   ): void {
     if (!key) {
       this.save_data_to_firebase();
@@ -277,16 +326,16 @@ export class DocumentState<
     if (!update || !this.docRef || !this.value) {
       return;
     }
-    let newValue: T[K];
+    let newValue: DataApp[K];
     if (typeof update === "function") {
-      const updateFn = update as (prevValue: T[K]) => T[K];
+      const updateFn = update as (prevValue: DataApp[K]) => DataApp[K];
       const prevValue = this.value[key];
       newValue = updateFn(prevValue);
     } else {
       newValue = update;
     }
 
-    this.value[key] = newValue as NonNullable<TConverted>[K];
+    this.value[key] = newValue as NonNullable<DataApp>[K];
 
     this.save_data_to_firebase();
   }

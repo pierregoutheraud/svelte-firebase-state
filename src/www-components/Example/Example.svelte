@@ -3,7 +3,7 @@
   import CodeSnippet from "../CodeSnippet/CodeSnippet.svelte";
 
   type Props = {
-    text: string;
+    text?: string;
     code: string;
     children: Snippet;
   };
@@ -12,9 +12,9 @@
 </script>
 
 <div class="container">
-  <h4>{text}</h4>
+  {#if text}<h4>{text}</h4>{/if}
   <div class="content">
-    {@render children()}
+    <div class="demo">{@render children()}</div>
     <CodeSnippet {code} />
   </div>
 </div>
@@ -24,5 +24,14 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+  .demo {
+    border: 2px solid var(--gray-3);
+    border-bottom: none;
+    background: var(--gray-2);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 </style>

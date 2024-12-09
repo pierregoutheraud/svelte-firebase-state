@@ -20,6 +20,8 @@
       `"$lib/CollectionState.svelte.js"`,
       `"svelte-firebase-state"`
     );
+    s = s.replace(`"$lib/DocumentState.svelte.js"`, `"svelte-firebase-state"`);
+    s = s.replace(`../../../www-lib/`, `./`);
     s = removeStyleTags(s);
     return s;
   });

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { DocumentState } from "$lib/DocumentState.svelte.js";
+  import { where } from "firebase/firestore";
   import { firestore } from "../../../www-lib/firebase.js";
 
   interface User {
@@ -10,7 +11,12 @@
   const user = new DocumentState<User>({
     firestore,
     listen: true,
-    path: "users_2/X4BqYa3gKF5Oku0NqAh8"
+    // When you don't have the id of the document
+    // you can use collectionPath & query to query the document you need.
+    collectionPath: "users_2",
+    query: (u) => {
+      return [where("name", "==", "Anna")];
+    }
   });
 
   function handleChange() {
@@ -22,12 +28,13 @@
   }
 </script>
 
-<div class="demo">
+<div class="container">
   {#if user.data}
     <div class="user">
       <img
-        src={`https://identicons-server.fly.dev/${user.data.name}?pixelSize=4&width=30&height=30`}
+        src={`https://identicons-server.fly.dev/${user.data.name}?pixelSize=20`}
         alt="user"
+        width="30"
       />
       <p>{user.data.name}</p>
       <p>{user.data.age}</p>
@@ -37,9 +44,7 @@
 </div>
 
 <style>
-  .demo {
-    background: var(--gray-2);
-    padding: 40px;
+  .container {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -51,13 +56,12 @@
     gap: 8px;
   }
 
-  .demo button {
+  .container button {
     width: fit-content;
     text-align: center;
     height: 21px;
     padding: 0;
     flex-shrink: 0;
-
     cursor: pointer;
     border: 1px solid black;
     padding: 0 8px;

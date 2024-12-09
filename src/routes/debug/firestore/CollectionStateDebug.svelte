@@ -1,10 +1,13 @@
 <script lang="ts">
-  import { collection, query } from "firebase/firestore";
-  import { type FirestoreUser } from "./states.svelte.js";
   import { CollectionState } from "$lib/CollectionState.svelte.js";
   import { firestore } from "../../../www-lib/firebase.js";
 
-  const firestoreUsersState = new CollectionState<FirestoreUser>({
+  interface User {
+    name: string;
+    age: number;
+  }
+
+  const firestoreUsersState = new CollectionState<User>({
     firestore,
     listen: true,
     path: () => "users"

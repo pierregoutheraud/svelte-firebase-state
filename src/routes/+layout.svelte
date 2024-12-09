@@ -1,10 +1,10 @@
 <script lang="ts">
   import "./global.css";
-  import GithubIcon from "../components/GithubIcon.svelte";
   import { onMount, type Snippet } from "svelte";
   import { page } from "$app/stores";
   import Nav from "../www-components/Nav/Nav.svelte";
   import NavItem from "../www-components/Nav/NavItem.svelte";
+  import GithubIcon from "../www-components/GithubIcon/GithubIcon.svelte";
 
   interface Props {
     children: Snippet;

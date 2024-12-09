@@ -1,21 +1,39 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import CodeSnippet from "../CodeSnippet/CodeSnippet.svelte";
+  import Tag from "../Tag/Tag.svelte";
 
   type Props = {
     text?: string;
     code: string;
     children: Snippet;
+    demoPosition?: "top" | "bottom";
   };
 
-  let { text, code, children }: Props = $props();
+  let { text, code, children, demoPosition = "top" }: Props = $props();
 </script>
+
+{#snippet demo()}
+  <div class="demo">
+    <Tag backgroundColor="var(--teal)">demo</Tag>
+    {@render children()}
+  </div>
+{/snippet}
 
 <div class="container">
   {#if text}<h4>{text}</h4>{/if}
-  <div class="content">
-    <div class="demo">{@render children()}</div>
-    <CodeSnippet {code} />
+  <div
+    class="content"
+    class:demoTop={demoPosition === "top"}
+    class:demoBottom={demoPosition === "bottom"}
+  >
+    {#if demoPosition === "top"}
+      {@render demo()}
+      <CodeSnippet {code} />
+    {:else}
+      <CodeSnippet {code} />
+      {@render demo()}
+    {/if}
   </div>
 </div>
 
@@ -25,17 +43,31 @@
     flex-direction: column;
     gap: 10px;
   }
+
   .demo {
+    position: relative;
     border: 2px solid rgba(0, 0, 0, 0.02);
     background: rgba(0, 0, 0, 0.03);
 
     /* border: 2px solid var(--cyan-light-2); */
     /* background: var(--cyan-light-1); */
 
-    border-bottom: none;
     padding: 40px;
     display: flex;
     flex-direction: column;
     gap: 20px;
+  }
+
+  .content.demoTop .demo {
+    border-bottom: none;
+  }
+  .content.demoBottom .demo {
+    border-top: none;
+  }
+
+  .demo :global(.Tag) {
+    position: absolute;
+    top: 10px;
+    right: 10px;
   }
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import CodeSnippet from "../CodeSnippet/CodeSnippet.svelte";
+  import Tag from "../Tag/Tag.svelte";
 
   type Props = {
     code?: string;
@@ -18,14 +19,14 @@
     type,
     default: defaultProp
   }: Props = $props();
-
-  let isOptional = $derived(!isRequired);
 </script>
 
 <div class="param">
-  <span class="tag" class:isRequired class:isOptional>
-    {isRequired ? "required" : "optional"}
-  </span>
+  {#if isRequired}
+    <Tag backgroundColor="var(--red-1)">required</Tag>
+  {:else}
+    <Tag backgroundColor="var(--blue-muted)">optional</Tag>
+  {/if}
 
   <p>
     <span>{name}</span> ({type})
@@ -48,21 +49,10 @@
     position: relative;
   }
 
-  .tag {
-    padding: 0px 3px;
-    font-size: 14px;
-    font-weight: 400;
-    color: white;
-
+  .param :global(.Tag) {
     position: absolute;
     top: 10px;
     right: 10px;
-  }
-  .isOptional {
-    background: var(--blue-muted);
-  }
-  .isRequired {
-    background: var(--red-1);
   }
 
   .param {

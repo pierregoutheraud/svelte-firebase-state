@@ -1,5 +1,4 @@
 <script lang="ts">
-  import CodeSnippet from "../../../www-components/CodeSnippet/CodeSnippet.svelte";
   import Example from "../../../www-components/Example/Example.svelte";
   import Param from "../../../www-components/Param/Param.svelte";
   import DocumentStateDemo1 from "./DocumentStateDemo1.svelte";
@@ -19,7 +18,7 @@
 
 <h2>Quick example:</h2>
 
-<Example code={DocumentStateDemo1Code}>
+<Example code={DocumentStateDemo1Code} demoPosition="bottom">
   <DocumentStateDemo1 />
 </Example>
 
@@ -110,12 +109,13 @@ const user = new DocumentState<DbUser, AppUser>({
   firestore,
   path: "your/firestore/document/path",
   fromFirestore: (doc) => {
-    const [firstname, lastname] = doc.name.split(" ");
+    const data = doc.data();
+    const [firstname, lastname] = data.name.split(" ");
     return {
-      ...doc.data(),
+      ...data,
       firstname,
       lastname,
-      id
+      id: doc.id
     };
   },  
 });
@@ -171,16 +171,9 @@ const user = new DocumentState<DbUser, AppUser>({
 </Example>
 
 <style>
-  .title,
-  .param {
+  .title {
     display: flex;
     flex-direction: column;
     gap: 10px;
-  }
-
-  .param {
-    border: 2px solid var(--gray-3);
-    padding: 30px;
-    background: var(--gray-2);
   }
 </style>

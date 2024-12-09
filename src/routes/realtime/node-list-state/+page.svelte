@@ -15,10 +15,7 @@
 
 <h2>Quick example:</h2>
 
-<Example
-  text="Example: Listen to a list (array) for a chat"
-  code={NodeListStateDemo1Code}
->
+<Example code={NodeListStateDemo1Code} demoPosition="bottom">
   <NodeListStateDemo1 />
 </Example>
 

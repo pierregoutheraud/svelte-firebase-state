@@ -1,5 +1,4 @@
 <script lang="ts">
-  import CodeSnippet from "../../../www-components/CodeSnippet/CodeSnippet.svelte";
   import Example from "../../../www-components/Example/Example.svelte";
   import Param from "../../../www-components/Param/Param.svelte";
   import NodeStateDemo1 from "./NodeStateDemo1.svelte";
@@ -17,7 +16,7 @@
 
 <h2>Quick example:</h2>
 
-<Example code={NodeStateDemo3Code}>
+<Example code={NodeStateDemo3Code} demoPosition="bottom">
   <NodeStateDemo3 />
 </Example>
 

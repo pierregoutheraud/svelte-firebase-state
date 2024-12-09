@@ -26,9 +26,13 @@
     gap: 10px;
   }
   .demo {
-    border: 2px solid var(--gray-3);
+    border: 2px solid rgba(0, 0, 0, 0.02);
+    background: rgba(0, 0, 0, 0.03);
+
+    /* border: 2px solid var(--cyan-light-2); */
+    /* background: var(--cyan-light-1); */
+
     border-bottom: none;
-    background: var(--gray-2);
     padding: 40px;
     display: flex;
     flex-direction: column;

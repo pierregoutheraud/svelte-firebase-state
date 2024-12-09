@@ -2,6 +2,28 @@
   --red-1: #dd2c00;
   --red-2: #b82500;
   --red-3: #521000;
+
+  --blue: #0044dd;
+  --blue-muted: #336699;
+  --blue-light: #66ccff;
+  --blue-dark: #001f4d;
+
+  /* Alice Blue (#F0F8FF): A soft, almost white-blue that’s very easy on the eyes. */
+  /* #E6F7FF: A pale tint of cyan-blue, great if you need a subtle, fresh background. */
+  /* #ECF5FE: A gentle pastel blue, offering a calm, airy feel. */
+  --blue-light-1: #e6f7ff;
+  --blue-light-2: #d6f2ff;
+
+  /* Honeydew (#F0FFF0): A nearly white hue with a soft, minty tint. */
+  /* Mint Cream (#F5FFFA): Slightly cooler and whiter than Honeydew, still fresh and calming. */
+  /* #ECFCE5: A gentle pastel green, providing a subtle, natural atmosphere without overpowering other colors. */
+  --green-light-1: #ecfce5;
+  --green-light-2: #e4fbda;
+
+  --teal: #00a6b2;
+  --cyan-light-1: #ebfeff;
+  --cyan-light-2: #d6fcff;
+
   --yellow-1: #ffc401;
   --yellow-2: #ff9101;
   --gray: #fbf6f4;

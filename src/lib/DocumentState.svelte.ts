@@ -14,26 +14,15 @@ import {
   query,
   QueryConstraint,
   limit,
-  QueryDocumentSnapshot,
-  type SnapshotOptions,
-  type FirestoreDataConverter,
-  type WithFieldValue
+  type FirestoreDataConverter
 } from "firebase/firestore";
 import { type Auth } from "firebase/auth";
-import { get_firebase_user_promise } from "./utils.svelte.js";
+import {
+  get_firebase_user_promise,
+  type FromFirestore,
+  type ToFirestore
+} from "./utils.svelte.js";
 import { SubscriberState } from "./SubscriberState.svelte.js";
-
-type FromFirestore<
-  DataApp extends DocumentData,
-  DataDb extends DocumentData
-> = (
-  snapshot: QueryDocumentSnapshot<DataApp, DataDb>,
-  options?: SnapshotOptions
-) => DataApp;
-
-type ToFirestore<DataApp extends DocumentData, DataDb extends DocumentData> = (
-  data: DataApp
-) => DataDb;
 
 type DocumentStateOptionsBase<
   DataDb extends DocumentData,
@@ -87,8 +76,6 @@ export class DocumentState<
   private readonly listenAtStart: boolean;
   private readonly getUser: Promise<User | null>;
   private readonly queryParams?: QueryParamsFn;
-  private readonly fromFirestore?: FromFirestore<DataApp, DataDb>;
-  private readonly toFirestore?: ToFirestore<DataApp, DataDb>;
   private readonly converter: FirestoreDataConverter<DataApp, DataDb>;
 
   constructor({
@@ -110,8 +97,6 @@ export class DocumentState<
     this.listenAtStart = listenAtStart;
     this.getUser = get_firebase_user_promise(this.auth);
     this.queryParams = queryParams;
-    this.fromFirestore = fromFirestore;
-    this.toFirestore = toFirestore;
 
     const defaultFromFirestore: FromFirestore<DataApp, DataDb> = (snap) => ({
       ...snap.data(),
@@ -124,8 +109,8 @@ export class DocumentState<
     };
 
     this.converter = {
-      toFirestore: this.toFirestore ?? defaultToFirestore,
-      fromFirestore: this.fromFirestore ?? defaultFromFirestore
+      toFirestore: toFirestore ?? defaultToFirestore,
+      fromFirestore: fromFirestore ?? defaultFromFirestore
     };
   }
 

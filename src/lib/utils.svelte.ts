@@ -3,6 +3,7 @@ import type {
   DocumentData,
   FirestoreDataConverter,
   QueryDocumentSnapshot,
+  SnapshotOptions,
   WithFieldValue
 } from "firebase/firestore";
 import { untrack } from "svelte";
@@ -53,3 +54,16 @@ export const genericIdConverter = <
     } as unknown as DataApp;
   }
 });
+
+export type FromFirestore<
+  DataApp extends DocumentData,
+  DataDb extends DocumentData
+> = (
+  snapshot: QueryDocumentSnapshot<DataApp, DataDb>,
+  options?: SnapshotOptions
+) => DataApp;
+
+export type ToFirestore<
+  DataApp extends DocumentData,
+  DataDb extends DocumentData
+> = (data: DataApp) => DataDb;

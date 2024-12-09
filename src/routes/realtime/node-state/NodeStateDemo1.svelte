@@ -44,8 +44,6 @@
 
 <style>
   .demo {
-    background: var(--gray-2);
-    padding: 40px;
     display: flex;
     flex-direction: column;
     gap: 20px;

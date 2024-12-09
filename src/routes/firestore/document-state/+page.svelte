@@ -1,6 +1,7 @@
 <script lang="ts">
   import CodeSnippet from "../../../www-components/CodeSnippet/CodeSnippet.svelte";
   import Example from "../../../www-components/Example/Example.svelte";
+  import Param from "../../../www-components/Param/Param.svelte";
   import DocumentStateDemo1 from "./DocumentStateDemo1.svelte";
   import DocumentStateDemo1Code from "./DocumentStateDemo1.svelte?raw";
   import DocumentStateDemo2 from "./DocumentStateDemo2.svelte";
@@ -18,58 +19,48 @@
 
 <h2>Quick example:</h2>
 
-<Example code={DocumentStateDemo3Code}>
-  <DocumentStateDemo3 />
+<Example code={DocumentStateDemo1Code}>
+  <DocumentStateDemo1 />
 </Example>
 
 <h2>Parameters:</h2>
 
-<div class="param">
-  <p>
-    <span>auth:</span>The firebase auth instance (optional).
-  </p>
-  <CodeSnippet
-    language="typescript"
-    code={`import { auth } from "./firebase.js"; // Your firebase auth instance
+<Param
+  name="firestore"
+  type="Firestore"
+  description="The firebase firestore instance."
+  isRequired
+/>
+
+<Param
+  name="auth"
+  type="Auth"
+  description="The firebase auth instance."
+  code={`import { auth } from "./firebase.js"; // Your firebase auth instance
 
 const user = new DocumentState<DbUser>({
   auth, // <-
   firestore,
 
-  // ->Use the current user in the path
+  // -> Use the current user in the path
   path: currentUser => \`users/\${currentUser?.uid}\`, 
 });`}
-  />
-</div>
+/>
 
-<div class="param">
-  <p>
-    <span>firestore:</span> The firebase firestore instance (required).
-  </p>
-</div>
+<Param
+  name="listen"
+  type="boolean"
+  description="Listen for real-time updates."
+  default="false"
+/>
 
-<div class="param">
-  <p>
-    <span>listen:</span> Listen for real-time updates (optional - default: false).
-  </p>
-</div>
+<Param name="path" type="string" description="The path to the document." />
 
-<div class="param">
-  <p>
-    <span>path:</span> The path to the document (optional).
-  </p>
-</div>
-
-<div class="param">
-  <p>
-    <span>collectionPath:</span> The path to the collection (optional).<br />
-    <span>query:</span> Function that returns the query constraints (optional).<br
-    />
-    Both params should be used together and without the path param.
-  </p>
-  <CodeSnippet
-    language="typescript"
-    code={`
+<Param
+  name="collectionPath"
+  type="string"
+  description="The path to the collection. Should be used with the query param."
+  code={`
 const user = new DocumentState<DbUser>({
   firestore,
   // When you don't have the id of the document
@@ -79,18 +70,30 @@ const user = new DocumentState<DbUser>({
     return [where("name", "==", "Anna")];
   }
 });`}
-  />
-</div>
+/>
 
-<div class="param">
-  <p>
-    <span>fromFirestore:</span> Function that converts the Firestore data to the
-    app data (optional)
-  </p>
+<Param
+  name="query"
+  type="(user: User | null) => QueryConstraint[]"
+  description="Function that returns the query constraints. Should be used with the collectionPath param."
+  code={`
+const user = new DocumentState<DbUser>({
+  firestore,
+  // When you don't have the id of the document
+  // you can use collectionPath & query to query the document you need.
+  collectionPath: "users",
+  query: (u) => {
+    return [where("name", "==", "Anna")];
+  }
+});`}
+/>
 
-  <CodeSnippet
-    language="typescript"
-    code={`// fromFirestore example
+<Param
+  name="fromFirestore"
+  type="(snapshot) => DataApp"
+  description="Function that converts the Firestore data to the app data"
+  default={`snap => ({ ...snap.data(), id: snap.id })`}
+  code={`// fromFirestore example
 
 type DbUser = {
   name: string;
@@ -127,18 +130,14 @@ $inspect(user.data);
   lastname: "Smith" 
 }
 */`}
-  />
-</div>
+/>
 
-<div class="param">
-  <p>
-    <span>toFirestore:</span> Function that converts the app data the firestore data
-    (optional)
-  </p>
-
-  <CodeSnippet
-    language="typescript"
-    code={`type DbUser = {
+<Param
+  name="toFirestore"
+  type="(data: DataApp) => DataDb"
+  description="Function that converts the app data the firestore data"
+  default="data => data"
+  code={`type DbUser = {
   name: string;
   age: number;
 };
@@ -156,16 +155,15 @@ const user = new DocumentState<DbUser, AppUser>({
     return d;
   },  
 });`}
-  />
-</div>
+/>
 
 <h2>More examples:</h2>
 
 <Example
   text="Fetch a document & listen for changes"
-  code={DocumentStateDemo1Code}
+  code={DocumentStateDemo3Code}
 >
-  <DocumentStateDemo1 />
+  <DocumentStateDemo3 />
 </Example>
 
 <Example text="Query a document in a collection" code={DocumentStateDemo2Code}>

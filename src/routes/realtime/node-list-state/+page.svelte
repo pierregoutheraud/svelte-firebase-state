@@ -1,8 +1,11 @@
 <script lang="ts">
   import CodeSnippet from "../../../www-components/CodeSnippet/CodeSnippet.svelte";
   import Example from "../../../www-components/Example/Example.svelte";
+  import Param from "../../../www-components/Param/Param.svelte";
   import NodeListStateDemo1 from "./NodeListStateDemo1.svelte";
   import NodeListStateDemo1Code from "./NodeListStateDemo1.svelte?raw";
+  import NodeListStateDemo2 from "./NodeListStateDemo2.svelte";
+  import NodeListStateDemo2Code from "./NodeListStateDemo2.svelte?raw";
 </script>
 
 <p>
@@ -10,34 +13,56 @@
   supporting fetching, live updates, and saving changes with optional autosave.
 </p>
 
-<CodeSnippet
-  language="typescript"
-  code={`const users = new NodeListState<User>({
-  database,
-  path: "users"
-});`}
-/>
-<CodeSnippet
-  language="typescript"
-  code={`// NodeListState Options
-
-// The firebase auth instance (optional)
-// In case you want to use the current user in the path
-auth?: Auth;
-
-// The firebase database instance
-database: Database;
-
-// The path to the collection
-path: string | ((currentUser: User | null) => string);
-
-// Listen for real-time updates (optional - default: false)
-listen?: boolean;`}
-/>
+<h2>Quick example:</h2>
 
 <Example
   text="Example: Listen to a list (array) for a chat"
   code={NodeListStateDemo1Code}
 >
   <NodeListStateDemo1 />
+</Example>
+
+<h2>Parameters:</h2>
+
+<Param
+  name="database"
+  type="Database"
+  description="The firebase database instance."
+  isRequired
+/>
+
+<Param
+  name="path"
+  type="string | ((currentUser: User | null) => string)"
+  description="The path to the node in the database."
+  isRequired
+/>
+
+<Param
+  name="auth"
+  type="Auth"
+  description="The firebase auth instance."
+  code={`import { auth } from "./firebase.js"; // Your firebase auth instance
+
+const user = new NodeListState<DbUser>({
+  database,
+  auth, // <-
+  path: currentUser => \`users/\${currentUser?.uid}\`, // -> Use firebase current user
+});`}
+/>
+
+<Param
+  name="listen"
+  type="boolean"
+  description="Listen for real-time updates."
+  default="false"
+/>
+
+<h2>More examples:</h2>
+
+<Example
+  text="Listen to a list (array) for a chat"
+  code={NodeListStateDemo2Code}
+>
+  <NodeListStateDemo2 />
 </Example>

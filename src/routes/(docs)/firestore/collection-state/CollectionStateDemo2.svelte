@@ -1,7 +1,7 @@
 <script lang="ts">
   import { addDoc, collection, orderBy } from "firebase/firestore";
   import { CollectionState } from "$lib/CollectionState.svelte.js";
-  import { firestore } from "../../../www-lib/firebase.js";
+  import { firestore } from "@/www-lib/firebase.js";
 
   interface User {
     name: string;

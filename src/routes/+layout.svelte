@@ -2,9 +2,9 @@
   import "./global.css";
   import { onMount, type Snippet } from "svelte";
   import { page } from "$app/stores";
-  import Nav from "../www-components/Nav/Nav.svelte";
-  import NavItem from "../www-components/Nav/NavItem.svelte";
-  import GithubIcon from "../www-components/GithubIcon/GithubIcon.svelte";
+  import Nav from "@/www-components/Nav/Nav.svelte";
+  import NavItem from "@/www-components/Nav/NavItem.svelte";
+  import GithubIcon from "@/www-components/GithubIcon/GithubIcon.svelte";
 
   interface Props {
     children: Snippet;
@@ -45,7 +45,7 @@
     </div>
   </header>
 
-  <section class="docs">
+  <section class="content">
     <Nav>
       <NavItem href={"/"} active={$page.url.pathname === "/"}>
         What is it?
@@ -61,6 +61,12 @@
         active={$page.url.pathname.includes("/realtime")}
       >
         Realtime Database
+      </NavItem>
+      <NavItem
+        href="/playground"
+        active={$page.url.pathname.includes("/playground")}
+      >
+        Playground
       </NavItem>
     </Nav>
 
@@ -145,11 +151,14 @@
     font-size: 40px;
   }
 
-  .docs {
+  .content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 40px 0 500px;
-    width: 1000px;
+    width: 100%;
+    padding: 30px;
+  }
+
+  .content :global(.Nav) {
+    align-self: center;
   }
 </style>

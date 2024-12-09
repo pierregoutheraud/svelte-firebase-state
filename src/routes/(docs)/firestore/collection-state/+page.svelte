@@ -1,7 +1,6 @@
 <script lang="ts">
-  import CodeSnippet from "../../../www-components/CodeSnippet/CodeSnippet.svelte";
-  import Example from "../../../www-components/Example/Example.svelte";
-  import Param from "../../../www-components/Param/Param.svelte";
+  import Example from "@/www-components/Example/Example.svelte";
+  import Param from "@/www-components/Param/Param.svelte";
   import CollectionStateDemo1 from "./CollectionStateDemo1.svelte";
   import CollectionStateDemo1Code from "./CollectionStateDemo1.svelte?raw";
   import CollectionStateDemo2 from "./CollectionStateDemo2.svelte";
@@ -10,7 +9,7 @@
 
 <div class="title">
   <p>
-    <span>CollectionState</span> -> Manages a Firestore collection.<br />Fetches
+    <span>CollectionState</span> manages a Firestore collection.<br />Fetches
     data, listens for real-time updates, and provides utilities for adding,
     updating, and deleting documents.
   </p>

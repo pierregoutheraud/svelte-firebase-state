@@ -1,7 +1,7 @@
 <script lang="ts">
   import { NodeListState } from "$lib/NodeListState.svelte.js";
   import { limitToLast, orderByChild } from "firebase/database";
-  import { database as database } from "../../../www-lib/firebase.js";
+  import { database as database } from "@/www-lib/firebase.js";
 
   interface Message {
     username: string;

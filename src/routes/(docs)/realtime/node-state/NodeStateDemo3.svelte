@@ -1,6 +1,6 @@
 <script lang="ts">
   import { NodeState } from "$lib/NodeState.svelte.js";
-  import { database } from "../../../www-lib/firebase.js";
+  import { database } from "@/www-lib/firebase.js";
 
   interface User {
     age: number;

@@ -4,7 +4,7 @@
   import {
     removeStyleTags,
     replaceTabsBySpaces
-  } from "../../www-lib/string.helpers.js";
+  } from "@/www-lib/string.helpers.js";
 
   type Props = {
     code: string;
@@ -21,7 +21,7 @@
       `"svelte-firebase-state"`
     );
     s = s.replace(`"$lib/DocumentState.svelte.js"`, `"svelte-firebase-state"`);
-    s = s.replace(`../../../www-lib/`, `./`);
+    s = s.replace(`@/www-lib/`, `./`);
     s = removeStyleTags(s);
     return s;
   });

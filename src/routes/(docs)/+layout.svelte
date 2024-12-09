@@ -1,21 +1,21 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  interface Props {
-    children: Snippet;
-  }
-
+  type Props = { children: Snippet };
   let { children }: Props = $props();
 </script>
 
-<div class="Nav">
+<div class="container">
   {@render children()}
 </div>
 
 <style>
-  .Nav {
-    align-self: center;
+  .container {
+    margin: 0 auto;
     display: flex;
+    flex-direction: column;
     gap: 20px;
+    padding: 20px 0 500px;
+    width: 1000px;
   }
 </style>

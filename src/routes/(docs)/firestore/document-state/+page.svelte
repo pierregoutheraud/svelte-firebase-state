@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Example from "../../../www-components/Example/Example.svelte";
-  import Param from "../../../www-components/Param/Param.svelte";
+  import Example from "@/www-components/Example/Example.svelte";
+  import Param from "@/www-components/Param/Param.svelte";
   import DocumentStateDemo1 from "./DocumentStateDemo1.svelte";
   import DocumentStateDemo1Code from "./DocumentStateDemo1.svelte?raw";
   import DocumentStateDemo2 from "./DocumentStateDemo2.svelte";
@@ -11,8 +11,8 @@
 
 <div class="title">
   <p>
-    <span>DocumentState</span> -> Manages a single Firestore document.<br
-    />Fetch data, listen for real-time updates and save changes to Firebase.
+    <span>DocumentState</span> manages a single Firestore document.<br />Fetch
+    data, listen for real-time updates and save changes to Firebase.
   </p>
 </div>
 

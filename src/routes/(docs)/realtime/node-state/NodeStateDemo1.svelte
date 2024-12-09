@@ -1,6 +1,6 @@
 <script lang="ts">
   import { NodeState } from "$lib/NodeState.svelte.js";
-  import { database } from "../../../www-lib/firebase.js";
+  import { database } from "@/www-lib/firebase.js";
 
   interface User {
     age: number;
@@ -11,21 +11,13 @@
   const user = new NodeState<User>({
     database,
     path: "users/1",
-    listen: true,
-    autosave: true
+    listen: true
   });
 
-  const handleInput = (key: keyof User) => (e: Event) => {
-    if (!user.data) return;
-
-    const target = e.target as HTMLInputElement;
-    // Because autosave === true, we don't need to call user.save() here
-    // For now autosave only works when you re-assign the data object, not when you mutate it
-    user.data = {
-      ...user.data,
-      [key]: target.value
-    };
-  };
+  function saveUser() {
+    user.save();
+    window.alert("User updated");
+  }
 </script>
 
 <div class="demo">
@@ -38,18 +30,14 @@
       <p>{user.data.username}, {user.data.age}y</p>
     </div>
     <div class="form">
-      <input
-        type="string"
-        value={user.data.avatarSeed}
-        oninput={handleInput("avatarSeed")}
-      />
+      <input type="string" bind:value={user.data.avatarSeed} />
       <input
         type="text"
         placeholder="username"
-        value={user.data.username}
-        oninput={handleInput("username")}
+        bind:value={user.data.username}
       />
-      <input type="number" value={user.data.age} oninput={handleInput("age")} />
+      <input type="number" bind:value={user.data.age} />
+      <button onclick={saveUser}>Save</button>
     </div>
   {/if}
 </div>
@@ -67,13 +55,23 @@
     gap: 10px;
   }
 
-  .demo input {
+  .demo input,
+  .demo button {
     height: 30px;
     padding: 0 10px;
   }
 
   .demo input {
     border: 1px solid black;
+  }
+  .demo button {
+    cursor: pointer;
+    border: 1px solid black;
+    padding: 0 8px;
+    font-size: 16px;
+    background: black;
+    color: white;
+    width: fit-content;
   }
 
   .form {

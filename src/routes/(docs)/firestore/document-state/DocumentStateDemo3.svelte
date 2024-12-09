@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DocumentState } from "$lib/DocumentState.svelte.js";
-  import { firestore } from "../../../www-lib/firebase.js";
+  import { firestore } from "@/www-lib/firebase.js";
 
   interface User {
     name: string;

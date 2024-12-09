@@ -8,6 +8,9 @@ const config = {
     // This allows you to use your library components in the docs
     files: {
       lib: "src/lib"
+    },
+    alias: {
+      "@/*": "src/*"
     }
   },
   preprocess: vitePreprocess()

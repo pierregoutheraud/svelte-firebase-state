@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Example from "../../../www-components/Example/Example.svelte";
-  import Param from "../../../www-components/Param/Param.svelte";
+  import Example from "@/www-components/Example/Example.svelte";
+  import Param from "@/www-components/Param/Param.svelte";
   import NodeStateDemo1 from "./NodeStateDemo1.svelte";
   import NodeStateDemo1Code from "./NodeStateDemo1.svelte?raw";
   import NodeStateDemo2 from "./NodeStateDemo2.svelte";
@@ -10,7 +10,7 @@
 </script>
 
 <p>
-  <span>NodeState</span> -> Manages a specific node in the Realtime Database, support
+  <span>NodeState</span> manages a specific node in the Realtime Database, support
   fetching, live updates and saving changes with optional autosave.
 </p>
 

@@ -11,18 +11,18 @@ import {
   type QueryDocumentSnapshot,
   type CollectionReference
 } from "firebase/firestore";
-import { type User } from "firebase/auth";
 import {
   FirestoreState,
   type FirestoreStateOptions,
+  type PathParam,
   type QueryParamsFn
 } from "./FirestoreState.svelte.js";
 
 type CollectionStateOptions<
   DataDb extends DocumentData,
   DataApp extends DocumentData
-> = FirestoreStateOptions<DataDb, DataApp> & {
-  path: string | ((user: User | null) => string);
+> = Omit<FirestoreStateOptions<DataDb, DataApp>, "pathFunctionOrString"> & {
+  path: PathParam;
   query?: QueryParamsFn;
 };
 
@@ -56,7 +56,7 @@ export class CollectionState<
     this.queryParamsFn = queryParamsFn;
   }
 
-  private getCollectionFromPath(path: string) {
+  private get_collection_from_path(path: string) {
     const pathArray: [string, ...string[]] = path.split("/") as [
       string,
       ...string[]
@@ -64,7 +64,7 @@ export class CollectionState<
     return collection(this.firestore, ...pathArray);
   }
 
-  private async getQueryRef(): Promise<Query | undefined> {
+  private async get_query_ref(): Promise<Query | undefined> {
     if (this.queryRef) {
       return this.queryRef;
     }
@@ -77,7 +77,7 @@ export class CollectionState<
       throw new Error("Path string is not set");
     }
 
-    this.collectionRef = this.getCollectionFromPath(pathStr);
+    this.collectionRef = this.get_collection_from_path(pathStr);
 
     const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
     this.queryRef = firestoreQuery(this.collectionRef, ...queryParams);
@@ -85,20 +85,20 @@ export class CollectionState<
     return this.queryRef;
   }
 
-  private mapData(doc: QueryDocumentSnapshot<DataApp, DocumentData>): DataApp {
+  private map_data(doc: QueryDocumentSnapshot<DataApp, DocumentData>): DataApp {
     return doc.data();
   }
 
   protected async fetch_data(): Promise<void> {
     this.loading = true;
 
-    const queryRef = await this.getQueryRef();
+    const queryRef = await this.get_query_ref();
     if (!queryRef) {
       return;
     }
 
     const querySnapshot = await getDocs(queryRef.withConverter(this.converter));
-    this.value = querySnapshot.docs.map(this.mapData);
+    this.value = querySnapshot.docs.map(this.map_data);
 
     this.loading = false;
   }
@@ -108,7 +108,7 @@ export class CollectionState<
       return;
     }
 
-    const queryRef = await this.getQueryRef();
+    const queryRef = await this.get_query_ref();
     if (!queryRef) {
       return;
     }
@@ -121,7 +121,7 @@ export class CollectionState<
           this.value = [];
           return;
         }
-        const newData = querySnapshot.docs.map(this.mapData);
+        const newData = querySnapshot.docs.map(this.map_data);
         this.value = newData;
         callback?.(this.value);
       }
@@ -157,7 +157,7 @@ export class CollectionState<
     return docRef.id;
   }
 
-  getDocRef(id: string) {
+  get_doc_ref(id: string) {
     if (!this.collectionRef) {
       throw new Error("Collection reference is not set");
     }
@@ -170,7 +170,7 @@ export class CollectionState<
       return;
     }
 
-    const docRef = this.getDocRef(id);
+    const docRef = this.get_doc_ref(id);
     return deleteDoc(docRef);
   }
 }

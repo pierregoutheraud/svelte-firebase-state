@@ -122,7 +122,7 @@ export class FirestoreState<
     return this.fetch_data();
   }
 
-  get isLoading(): boolean {
+  get is_loading(): boolean {
     return this.loading;
   }
 }

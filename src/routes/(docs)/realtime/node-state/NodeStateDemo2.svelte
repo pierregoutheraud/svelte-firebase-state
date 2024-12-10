@@ -19,6 +19,7 @@
     if (!user.data) return;
 
     const target = e.target as HTMLInputElement;
+
     // Because autosave === true, we don't need to call user.save() here
     // For now autosave only works when you re-assign the data object, not when you mutate it
     user.data = {

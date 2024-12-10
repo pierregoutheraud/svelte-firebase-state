@@ -82,7 +82,7 @@ export class NodeState<T> extends SubscriberState<T> {
     this.unsub = onValue(
       this.nodeRef,
       (snapshot) => {
-        this.isUpdatingFromDB = true;
+        // this.isUpdatingFromDB = true;
         this.value = snapshot.val() as T;
         // this.firstFetchDone = true;
       },

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { NodeState } from "$lib/NodeState.svelte.js";
   import { NodeListState } from "$lib/NodeListState.svelte.js";
-  import { ChildState, ParentState } from "$lib/test.svelte.js";
   import { database } from "@/www-lib/firebase.js";
 
   export const users = new NodeListState<RealtimeUser>({

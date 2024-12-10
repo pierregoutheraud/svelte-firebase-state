@@ -1,52 +1,27 @@
-import { type User } from "firebase/auth";
 import {
-  Firestore,
-  Query,
-  type DocumentData,
   onSnapshot,
-  type Unsubscribe,
   doc,
   getDoc,
-  DocumentReference,
   setDoc,
   getDocs,
   collection,
   query,
-  QueryConstraint,
   limit,
-  type FirestoreDataConverter
+  type Query,
+  type DocumentData,
+  type DocumentReference
 } from "firebase/firestore";
-import { type Auth } from "firebase/auth";
 import {
-  get_firebase_user_promise,
-  type FromFirestore,
-  type ToFirestore
-} from "./utils.svelte.js";
-import { SubscriberState } from "./SubscriberState.svelte.js";
-
-type DocumentStateOptionsBase<
-  DataDb extends DocumentData,
-  DataApp extends DocumentData
-> = {
-  auth?: Auth;
-  firestore: Firestore;
-  listen?: boolean;
-  fromFirestore?: FromFirestore<DataApp, DataDb>;
-  toFirestore?: ToFirestore<DataApp, DataDb>;
-};
-
-type PathParam =
-  | string
-  | null
-  | undefined
-  | ((user: User | null) => string | null | undefined);
-
-type QueryParamsFn = (user: User | null) => QueryConstraint[];
+  FirestoreState,
+  type FirestoreStateOptions,
+  type PathParam,
+  type QueryParamsFn
+} from "./FirestoreState.svelte.js";
 
 type DocumentStateOptions<
   DataDb extends DocumentData,
   DataApp extends DocumentData
-> = DocumentStateOptionsBase<DataDb, DataApp> &
+> = Omit<FirestoreStateOptions<DataDb, DataApp>, "pathFunctionOrString"> &
   (
     | {
         path?: never;
@@ -63,20 +38,12 @@ type DocumentStateOptions<
 export class DocumentState<
   DataDb extends DocumentData,
   DataApp extends DataDb & { id: string } = DataDb & { id: string }
-> extends SubscriberState<DataApp | null> {
-  private docRef: DocumentReference | undefined;
-  private unsub: Unsubscribe | undefined;
-  private loading = $state(false);
-  private queryRef: Query | undefined;
-
-  private readonly auth?: Auth;
-  private readonly firestore: Firestore;
-  private readonly pathFunctionOrString?: PathParam;
+> extends FirestoreState<DataDb, DataApp, DataApp> {
   private readonly collectionPathFunctionOrString?: PathParam;
-  private readonly listenAtStart: boolean;
-  private readonly getUser: Promise<User | null>;
   private readonly queryParams?: QueryParamsFn;
-  private readonly converter: FirestoreDataConverter<DataApp, DataDb>;
+
+  private docRef: DocumentReference | undefined | null;
+  private queryRef: Query | undefined;
 
   constructor({
     auth,
@@ -84,49 +51,21 @@ export class DocumentState<
     path: pathFunctionOrString,
     collectionPath: collectionPathFunctionOrString,
     query: queryParams,
-    listen: listenAtStart = false,
+    listen = false,
     fromFirestore,
     toFirestore
   }: DocumentStateOptions<DataDb, DataApp>) {
-    super();
-
-    this.auth = auth;
-    this.firestore = firestore;
-    this.pathFunctionOrString = pathFunctionOrString;
-    this.collectionPathFunctionOrString = collectionPathFunctionOrString;
-    this.listenAtStart = listenAtStart;
-    this.getUser = get_firebase_user_promise(this.auth);
-    this.queryParams = queryParams;
-
-    const defaultFromFirestore: FromFirestore<DataApp, DataDb> = (snap) => ({
-      ...snap.data(),
-      id: snap.id
+    super({
+      auth,
+      firestore,
+      listen,
+      fromFirestore,
+      toFirestore,
+      pathFunctionOrString: pathFunctionOrString ?? undefined
     });
 
-    const defaultToFirestore: ToFirestore<DataApp, DataDb> = (data) => {
-      const { id, ...rest } = data;
-      return rest as unknown as DataDb;
-    };
-
-    this.converter = {
-      toFirestore: toFirestore ?? defaultToFirestore,
-      fromFirestore: fromFirestore ?? defaultFromFirestore
-    };
-  }
-
-  start() {
-    if (this.listenAtStart) {
-      this.listen();
-    } else {
-      this.fetch_data();
-    }
-  }
-
-  stop(): void {
-    if (this.unsub) {
-      this.unsub();
-      this.unsub = undefined;
-    }
+    this.collectionPathFunctionOrString = collectionPathFunctionOrString;
+    this.queryParams = queryParams;
   }
 
   private async get_doc_ref(): Promise<typeof this.docRef | undefined> {
@@ -137,15 +76,10 @@ export class DocumentState<
     const user = await this.getUser;
 
     if (this.pathFunctionOrString) {
-      let pathStr: string | null | undefined;
-      if (typeof this.pathFunctionOrString === "function") {
-        pathStr = this.pathFunctionOrString(user);
-      } else {
-        pathStr = this.pathFunctionOrString;
-      }
+      let pathStr = await this.get_path_string();
 
       if (!pathStr) {
-        this.docRef = undefined;
+        this.docRef = null;
         return this.docRef;
       }
 
@@ -192,7 +126,7 @@ export class DocumentState<
     return this.docRef;
   }
 
-  private async fetch_data(): Promise<void> {
+  protected async fetch_data(): Promise<void> {
     this.loading = true;
 
     const docRef = await this.get_doc_ref();
@@ -212,7 +146,7 @@ export class DocumentState<
     this.loading = false;
   }
 
-  private async listen(): Promise<Unsubscribe | undefined> {
+  protected async listen(): Promise<void> {
     if (this.unsub) {
       return;
     }
@@ -264,6 +198,7 @@ export class DocumentState<
         return;
       }
       const newData = docSnap.data() as DataApp;
+
       // TODO: Check if the data we receive is the same as the one we have
       // in this case we don't need to update the value
       this.value = newData;
@@ -272,32 +207,12 @@ export class DocumentState<
     return this.unsub;
   }
 
-  get isLoading(): boolean {
-    return this.loading;
-  }
-
-  refetch(): Promise<void> {
-    return this.fetch_data();
-  }
-
   save_data_to_firebase() {
     if (!this.docRef) {
       return;
     }
     return setDoc(this.docRef, this.value || null, { merge: true });
   }
-
-  get data(): DataApp | null | undefined {
-    return this.value;
-  }
-
-  set data(data: DataApp | null) {
-    this.value = data;
-  }
-
-  // public save() {
-  //   console.log("SAVE");
-  // }
 
   public save<K extends keyof DataApp>(
     key?: K,

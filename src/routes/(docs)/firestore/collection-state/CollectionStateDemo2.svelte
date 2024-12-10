@@ -3,11 +3,15 @@
   import { CollectionState } from "$lib/CollectionState.svelte.js";
   import { firestore } from "@/www-lib/firebase.js";
 
-  interface User {
+  interface UserDb {
     name: string;
   }
 
-  const users = new CollectionState<User>({
+  interface UserApp extends UserDb {
+    id: string;
+  }
+
+  const users = new CollectionState<UserDb, UserApp>({
     firestore,
     listen: true,
     path: "users",
@@ -21,7 +25,7 @@
   }
 
   // svelte-firebase-state adds the id of the document in the data
-  function handleRemove(user: User & { id: string }) {
+  function handleRemove(user: UserApp) {
     users.delete(user.id);
   }
 

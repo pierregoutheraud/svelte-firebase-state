@@ -1,61 +1,39 @@
 import {
   collection,
-  Firestore,
   getDocs,
-  Query,
   query as firestoreQuery,
-  type DocumentData,
   onSnapshot,
-  type Unsubscribe,
-  QueryDocumentSnapshot,
   addDoc,
-  CollectionReference,
   deleteDoc,
   doc,
-  QueryConstraint,
-  type FirestoreDataConverter
+  type Query,
+  type DocumentData,
+  type QueryDocumentSnapshot,
+  type CollectionReference
 } from "firebase/firestore";
-import { type Auth, type User } from "firebase/auth";
+import { type User } from "firebase/auth";
 import {
-  get_firebase_user_promise,
-  type FromFirestore,
-  type ToFirestore
-} from "./utils.svelte.js";
-import { SubscriberState } from "./SubscriberState.svelte.js";
-
-type QueryParamsFn = (user: User | null) => QueryConstraint[];
+  FirestoreState,
+  type FirestoreStateOptions,
+  type QueryParamsFn
+} from "./FirestoreState.svelte.js";
 
 type CollectionStateOptions<
   DataDb extends DocumentData,
   DataApp extends DocumentData
-> = {
-  auth?: Auth;
-  firestore: Firestore;
+> = FirestoreStateOptions<DataDb, DataApp> & {
   path: string | ((user: User | null) => string);
   query?: QueryParamsFn;
-  listen?: boolean;
-  fromFirestore?: FromFirestore<DataApp, DataDb>;
-  toFirestore?: ToFirestore<DataApp, DataDb>;
 };
 
 export class CollectionState<
   DataDb extends DocumentData,
   DataApp extends DataDb & { id: string } = DataDb & { id: string }
-> extends SubscriberState<DataApp[] | null> {
-  private queryRef: Query | undefined;
-  private unsub: Unsubscribe | undefined;
-  private loading = $state(false);
-
-  private collectionRef: CollectionReference | undefined;
-  private readonly auth: Auth | undefined;
-  private readonly firestore: Firestore;
+> extends FirestoreState<DataDb, DataApp, DataApp[]> {
   private readonly queryParamsFn?: QueryParamsFn;
-  private readonly pathFunctionOrString:
-    | string
-    | ((user: User | null) => string);
-  private readonly listenAtStart: boolean;
-  private readonly getUser: Promise<User | null>;
-  private readonly converter: FirestoreDataConverter<DataApp, DataDb>;
+
+  private queryRef: Query | undefined;
+  private collectionRef: CollectionReference | undefined;
 
   constructor({
     auth,
@@ -66,28 +44,16 @@ export class CollectionState<
     fromFirestore,
     toFirestore
   }: CollectionStateOptions<DataDb, DataApp>) {
-    super();
-    this.auth = auth;
-    this.firestore = firestore;
-    this.queryParamsFn = queryParamsFn;
-    this.pathFunctionOrString = pathFunctionOrString;
-    this.listenAtStart = listenAtStart;
-    this.getUser = get_firebase_user_promise(this.auth);
-
-    const defaultFromFirestore: FromFirestore<DataApp, DataDb> = (snap) => ({
-      ...snap.data(),
-      id: snap.id
+    super({
+      auth,
+      firestore,
+      listen: listenAtStart,
+      fromFirestore,
+      toFirestore,
+      pathFunctionOrString
     });
 
-    const defaultToFirestore: ToFirestore<DataApp, DataDb> = (data) => {
-      const { id, ...rest } = data;
-      return rest as unknown as DataDb;
-    };
-
-    this.converter = {
-      toFirestore: toFirestore ?? defaultToFirestore,
-      fromFirestore: fromFirestore ?? defaultFromFirestore
-    };
+    this.queryParamsFn = queryParamsFn;
   }
 
   private getCollectionFromPath(path: string) {
@@ -105,11 +71,10 @@ export class CollectionState<
 
     const user = await this.getUser;
 
-    let pathStr: string;
-    if (typeof this.pathFunctionOrString === "function") {
-      pathStr = this.pathFunctionOrString(user);
-    } else {
-      pathStr = this.pathFunctionOrString;
+    let pathStr = await this.get_path_string();
+
+    if (!pathStr) {
+      throw new Error("Path string is not set");
     }
 
     this.collectionRef = this.getCollectionFromPath(pathStr);
@@ -124,27 +89,30 @@ export class CollectionState<
     return doc.data();
   }
 
-  private async fetch_data(): Promise<void> {
+  protected async fetch_data(): Promise<void> {
     this.loading = true;
+
     const queryRef = await this.getQueryRef();
     if (!queryRef) {
       return;
     }
+
     const querySnapshot = await getDocs(queryRef.withConverter(this.converter));
-    this.value = querySnapshot.docs.map((doc) => this.mapData(doc));
+    this.value = querySnapshot.docs.map(this.mapData);
+
     this.loading = false;
   }
 
-  private async listen(
-    callback?: (d: DataApp[]) => void
-  ): Promise<Unsubscribe | undefined> {
+  protected async listen(callback?: (d: DataApp[]) => void): Promise<void> {
     if (this.unsub) {
       return;
     }
+
     const queryRef = await this.getQueryRef();
     if (!queryRef) {
       return;
     }
+
     this.unsub = onSnapshot(
       queryRef.withConverter(this.converter),
       (querySnapshot) => {
@@ -153,20 +121,13 @@ export class CollectionState<
           this.value = [];
           return;
         }
-        const newData = querySnapshot.docs.map((doc) => this.mapData(doc));
+        const newData = querySnapshot.docs.map(this.mapData);
         this.value = newData;
         callback?.(this.value);
       }
     );
-    return this.unsub;
-  }
 
-  start(): void {
-    if (this.listenAtStart) {
-      this.listen();
-    } else {
-      this.fetch_data();
-    }
+    return;
   }
 
   stop(): void {
@@ -174,18 +135,6 @@ export class CollectionState<
       this.unsub();
       this.unsub = undefined;
     }
-  }
-
-  get data(): DataApp[] | null | undefined {
-    return this.value;
-  }
-
-  get isLoading(): boolean {
-    return this.loading;
-  }
-
-  refetch(): Promise<void> {
-    return this.fetch_data();
   }
 
   async add(data: DataDb): Promise<string | void> {

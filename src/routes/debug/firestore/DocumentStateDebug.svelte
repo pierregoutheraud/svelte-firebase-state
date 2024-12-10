@@ -24,7 +24,7 @@
   //   }
   // });
 
-  const user = new DocumentState<UserDb>({
+  const user = new DocumentState<UserDb, UserApp>({
     firestore,
     listen: true,
     path: "users_2/kek"

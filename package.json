@@ -1,6 +1,22 @@
 {
   "name": "svelte-firebase-state",
   "version": "1.0.3",
+  "description": "Simplify Firebase integration in Svelte and SvelteKit with reactive state management for Firestore and Realtime Database.",
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "firebase",
+    "firestore",
+    "realtime-database",
+    "state-management",
+    "reactive",
+    "live-updates",
+    "user-specific",
+    "frontend"
+  ],
+  "homepage": "https://svelte-firebase-state.vercel.app",
+  "author": "Pierre Goutheraud pierre.goutheraud@gmail.com",
+  "license": "MIT",
   "scripts": {
     "dev": "vite dev",
     "lib:build": "vite build --mode library && pnpm run package",

@@ -6,12 +6,12 @@ import {
   type FirestoreDataConverter,
   type Unsubscribe
 } from "firebase/firestore";
-import { SubscriberState } from "./SubscriberState.svelte.js";
+import { SubscriberState } from "../SubscriberState.svelte.js";
 import {
   get_firebase_user_promise,
   type FromFirestore,
   type ToFirestore
-} from "./utils.svelte.js";
+} from "../utils.svelte.js";
 
 export type QueryParamsFn = (user: User | null) => QueryConstraint[];
 

@@ -17,10 +17,17 @@
     let s = replaceTabsBySpaces(code);
     s = s.trim();
     s = s.replace(
-      `"$lib/CollectionState.svelte.js"`,
+      `"$lib/firestore/CollectionState.svelte.js"`,
       `"svelte-firebase-state"`
     );
-    s = s.replace(`"$lib/DocumentState.svelte.js"`, `"svelte-firebase-state"`);
+    s = s.replace(
+      `"$lib/firestore/DocumentState.svelte.js"`,
+      `"svelte-firebase-state"`
+    );
+    s = s.replace(
+      `"$lib/realtime-database/NodeState.svelte.js"`,
+      `"svelte-firebase-state"`
+    );
     s = s.replace(`@/www-lib/`, `./`);
     s = removeStyleTags(s);
     return s;

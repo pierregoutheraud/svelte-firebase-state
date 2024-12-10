@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NodeState } from "$lib/NodeState.svelte.js";
+  import { NodeState } from "$lib/realtime-database/NodeState.svelte.js";
   import { database } from "@/www-lib/firebase.js";
 
   interface User {

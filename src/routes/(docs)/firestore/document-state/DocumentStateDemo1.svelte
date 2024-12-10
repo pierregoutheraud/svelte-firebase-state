@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DocumentState } from "$lib/DocumentState.svelte.js";
+  import { DocumentState } from "$lib/firestore/DocumentState.svelte.js";
   import { firestore } from "@/www-lib/firebase.js";
 
   type DbUser = {

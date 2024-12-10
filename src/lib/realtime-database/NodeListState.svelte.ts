@@ -3,7 +3,6 @@ import {
   ref,
   type Database,
   onValue,
-  type Unsubscribe,
   type DatabaseReference,
   QueryConstraint,
   query,
@@ -11,8 +10,7 @@ import {
   get,
   DataSnapshot
 } from "firebase/database";
-import { get_firebase_user_promise } from "./utils.svelte.js";
-import { SubscriberState } from "./SubscriberState.svelte.js";
+import { RealtimeDatabaseState } from "./RealtimeDatabaseState.svelte.js";
 
 type PathFunctionOrString = ((user: User | null) => string) | string;
 
@@ -24,16 +22,10 @@ interface CreateNodeStateOptions {
   listen?: boolean;
 }
 
-export class NodeListState<T> extends SubscriberState<T[]> {
-  private readonly auth?: Auth;
-  private readonly database: Database;
-  private readonly pathFunctionOrString: PathFunctionOrString;
-  private readonly listenAtStart: boolean;
+export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
   private readonly queryParamsFn?: (user: User | null) => QueryConstraint[];
 
-  private unsub?: Unsubscribe;
   private listRef?: DatabaseReference;
-  private readonly getUser: Promise<User | null>;
   private queryRef?: Query;
 
   constructor({
@@ -43,35 +35,28 @@ export class NodeListState<T> extends SubscriberState<T[]> {
     listen: listenAtStart = false,
     query: queryParamsFn
   }: CreateNodeStateOptions) {
-    super();
+    super({
+      auth,
+      database,
+      listen: listenAtStart,
+      pathFunctionOrString
+    });
 
-    this.auth = auth;
-    this.database = database;
-    this.pathFunctionOrString = pathFunctionOrString;
-    this.listenAtStart = listenAtStart;
     this.queryParamsFn = queryParamsFn;
-    this.getUser = get_firebase_user_promise(this.auth);
   }
 
-  async start() {
-    const user = await this.getUser;
-
-    let pathStr: string;
-    if (typeof this.pathFunctionOrString === "function") {
-      pathStr = this.pathFunctionOrString(user);
-    } else {
-      pathStr = this.pathFunctionOrString;
+  protected async set_ref(): Promise<void> {
+    const pathStr = await this.get_path_string();
+    if (!pathStr) {
+      throw new Error("Path is not defined");
     }
 
     this.listRef = ref(this.database, pathStr);
-    const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
-    this.queryRef = query(this.listRef, ...queryParams);
 
-    if (this.listenAtStart) {
-      this.listen();
-    } else {
-      this.fetch_data();
-    }
+    const user = await this.getUser;
+    const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
+
+    this.queryRef = query(this.listRef, ...queryParams);
   }
 
   createArrayFromSnapshot(snapshot: DataSnapshot) {
@@ -86,8 +71,9 @@ export class NodeListState<T> extends SubscriberState<T[]> {
 
   listen() {
     if (!this.queryRef) {
-      throw new Error("Query reference is not set");
+      throw new Error("queryRef is not set");
     }
+
     this.unsub = onValue(this.queryRef, (snapshot) => {
       this.value = this.createArrayFromSnapshot(snapshot);
     });
@@ -102,21 +88,9 @@ export class NodeListState<T> extends SubscriberState<T[]> {
     this.value = this.createArrayFromSnapshot(snapshot);
   }
 
-  refetch(): Promise<void> {
-    return this.fetch_data();
-  }
-
   stop(): void {
     this.unsub?.();
     this.unsub = undefined;
-  }
-
-  get data(): T[] | null | undefined {
-    return this.value;
-  }
-
-  set data(data: T[] | undefined) {
-    this.value = data;
   }
 
   public dispose(): void {

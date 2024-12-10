@@ -1,6 +1,6 @@
 <script lang="ts">
   import { addDoc, collection, orderBy } from "firebase/firestore";
-  import { CollectionState } from "$lib/CollectionState.svelte.js";
+  import { CollectionState } from "$lib/firestore/CollectionState.svelte.js";
   import { firestore } from "@/www-lib/firebase.js";
 
   interface UserDb {

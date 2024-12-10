@@ -16,7 +16,7 @@
   }
   */
 
-  import { NodeListState } from "$lib/NodeListState.svelte.js";
+  import { NodeListState } from "$lib/realtime-database/NodeListState.svelte.js";
   import { limitToLast, orderByChild, push, ref, set } from "firebase/database";
   import { database as database } from "@/www-lib/firebase.js";
 

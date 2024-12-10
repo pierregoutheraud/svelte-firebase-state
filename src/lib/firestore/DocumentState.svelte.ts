@@ -129,13 +129,14 @@ export class DocumentState<
   protected async fetch_data(): Promise<void> {
     this.loading = true;
 
-    const docRef = await this.get_doc_ref();
-    if (!docRef) {
+    await this.get_doc_ref();
+
+    if (!this.docRef) {
       this.value = null;
       return;
     }
 
-    const docSnap = await getDoc(docRef);
+    const docSnap = await getDoc(this.docRef);
 
     if (!docSnap.exists()) {
       this.value = null;

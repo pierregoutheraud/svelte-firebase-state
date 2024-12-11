@@ -18,7 +18,7 @@
 
   import { NodeListState } from "$lib/realtime-database/NodeListState.svelte.js";
   import { limitToLast, orderByChild, push, ref, set } from "firebase/database";
-  import { database as database } from "@/www-lib/firebase.js";
+  import { database } from "@/www-lib/firebase.js";
 
   interface Message {
     username: string;
@@ -26,7 +26,7 @@
     timestamp: number;
   }
 
-  let username = $state("John");
+  let username = $state("");
   let text = $state("");
 
   export const messages = new NodeListState<Message>({
@@ -37,7 +37,10 @@
   });
 
   function handleSend() {
-    if (!username.length || !text.length) return;
+    if (!username.length || !text.length) {
+      window.alert("Please enter a username and a message.");
+      return;
+    }
 
     const messagesListRef = ref(database, "messages");
     const newMessageRef = push(messagesListRef);
@@ -54,7 +57,7 @@
 <div class="demo">
   <div class="form">
     <input type="text" placeholder="username" bind:value={username} />
-    <input type="text" placeholder="your message here" bind:value={text} />
+    <input type="text" placeholder="message" bind:value={text} />
     <button onclick={handleSend}>Send message</button>
   </div>
 

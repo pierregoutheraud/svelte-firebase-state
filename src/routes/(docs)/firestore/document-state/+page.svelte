@@ -145,7 +145,7 @@ $inspect(user.data);
 <Param
   name="toFirestore"
   type="(data: DataApp) => DataDb"
-  description="Function that converts the app data the firestore data"
+  description="Function that converts the app data to the firestore data"
   default="data => data"
   isOptional
   code={`type DbUser = {

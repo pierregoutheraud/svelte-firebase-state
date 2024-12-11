@@ -36,9 +36,9 @@
     <CodeSnippet
       language="typescript"
       code={`import { CollectionState } from 'svelte-firebase-state';
-import { firestore, auth } from "../firebase"; // Your firebase config file
+import { firestore, auth } from "./firebase.js"; // Your firebase config file
 
-const tasks = new CollectionState({
+const tasks = new CollectionState<Task>({
   auth,
   firestore,
   path: (user) => \`/users/\${user?.uid}/tasks\`,

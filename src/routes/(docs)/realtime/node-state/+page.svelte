@@ -56,6 +56,30 @@ const user = new NodeListState<DbUser>({
   default="false"
 />
 
+<h2>Methods:</h2>
+
+<Param
+  name="refetch"
+  type="() => Promise<Data>"
+  description="Re-fetch the data."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+/>
+
+<Param
+  name="save"
+  type="(key?: K, update?: DataApp[K] | ((prevValue: DataApp[K]) => DataApp[K])) => Promise<void>"
+  description="Save changes to the document."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await user.save("name", "Anna Smith");
+
+// or
+
+user.data.name = "Anna Smith";
+await user.save();`}
+/>
+
 <h2>More examples:</h2>
 
 <Example text="Listen to a node and save it" code={NodeStateDemo1Code}>

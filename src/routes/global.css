@@ -34,6 +34,13 @@
   --gray-6: #e0b9a5;
   --gray-7: #d7a994;
   --black: #24242e;
+
+  --light-pastel-blue-1: #dee7f7;
+  --light-pastel-blue-2: #eff3fb;
+
+  --light-pastel-pink: #f7deee;
+  --light-creamy-yellow: #f7f3de;
+  --light-lavender-pink: #fde7f7;
 }
 
 html {
@@ -107,11 +114,7 @@ h4 {
   font-weight: 500;
 }
 
-p {
+p,
+span {
   font-size: 16px;
-}
-
-p span {
-  font-size: 16px;
-  font-weight: 700;
 }

@@ -73,11 +73,12 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
 
   async fetch_data() {
     if (!this.nodeRef) {
-      return;
+      return null;
     }
 
     const snapshot = await get(this.nodeRef);
     this.value = snapshot.val() as Data;
+    return this.value;
   }
 
   stop(): void {

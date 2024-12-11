@@ -6,30 +6,41 @@
     code?: string;
     description: string;
     isRequired?: boolean;
+    isOptional?: boolean;
     name: string;
     type: string;
     default?: string;
+    backgroundColor?: string;
+    borderColor?: string;
   };
 
   let {
     code,
     description,
     isRequired = false,
+    isOptional = false,
     name,
     type,
-    default: defaultProp
+    default: defaultProp,
+    backgroundColor = "var(--gray-2)",
+    borderColor = "var(--gray-3)"
   }: Props = $props();
 </script>
 
-<div class="param">
+<div
+  class="param"
+  style:border-color={borderColor}
+  style:background-color={backgroundColor}
+>
   {#if isRequired}
     <Tag backgroundColor="var(--red-1)">required</Tag>
-  {:else}
+  {:else if isOptional}
     <Tag backgroundColor="var(--blue-muted)">optional</Tag>
   {/if}
 
   <p>
-    <span>{name}</span> ({type})
+    <span class="name">{name}</span>
+    <span class="type">{type}</span>
     {#if defaultProp}
       <br />
       <br />
@@ -59,8 +70,11 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    border: 2px solid var(--gray-3);
     padding: 30px;
-    background: var(--gray-2);
+    border: 2px solid;
+  }
+
+  .name {
+    font-weight: 700;
   }
 </style>

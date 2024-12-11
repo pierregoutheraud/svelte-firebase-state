@@ -76,11 +76,13 @@ export class RealtimeDatabaseState<Data> extends SubscriberState<Data | null> {
   }
 
   // Abstract methods for children to implement their fetching logic
-  protected async fetch_data(): Promise<void> {}
+  protected async fetch_data(): Promise<Data | null> {
+    return null;
+  }
 
   protected listen() {}
 
-  protected refetch(): Promise<void> {
+  protected refetch(): Promise<Data | null> {
     return this.fetch_data();
   }
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import CodeSnippet from "@/www-components/CodeSnippet/CodeSnippet.svelte";
   import Example from "@/www-components/Example/Example.svelte";
   import Param from "@/www-components/Param/Param.svelte";
   import NodeListStateDemo1 from "./NodeListStateDemo1.svelte";
@@ -53,6 +52,16 @@ const user = new NodeListState<DbUser>({
   type="boolean"
   description="Listen for real-time updates."
   default="false"
+/>
+
+<h2>Methods:</h2>
+
+<Param
+  name="refetch"
+  type="() => Promise<Data>"
+  description="Re-fetch the data."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
 />
 
 <h2>More examples:</h2>

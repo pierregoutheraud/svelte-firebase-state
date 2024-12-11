@@ -59,7 +59,7 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     this.queryRef = query(this.listRef, ...queryParams);
   }
 
-  createArrayFromSnapshot(snapshot: DataSnapshot) {
+  private createArrayFromSnapshot(snapshot: DataSnapshot) {
     const arr: T[] = [];
     snapshot.forEach((childSnapshot) => {
       // const childKey = childSnapshot.key;
@@ -69,7 +69,7 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     return arr;
   }
 
-  listen() {
+  protected listen() {
     if (!this.queryRef) {
       throw new Error("queryRef is not set");
     }
@@ -79,21 +79,18 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     });
   }
 
-  async fetch_data() {
+  protected async fetch_data() {
     if (!this.queryRef) {
       throw new Error("Query reference is not set");
     }
 
     const snapshot = await get(this.queryRef);
     this.value = this.createArrayFromSnapshot(snapshot);
+    return this.value;
   }
 
   stop(): void {
     this.unsub?.();
     this.unsub = undefined;
-  }
-
-  public dispose(): void {
-    this.stop();
   }
 }

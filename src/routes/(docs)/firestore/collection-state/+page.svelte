@@ -50,6 +50,7 @@ const tasks = new CollectionState<DbTasks, AppTasks>({
   // -> Use the current user in the path
   path: currentUser => \`users/\${currentUser?.uid}/tasks\`, 
 });`}
+  isOptional
 />
 
 <Param
@@ -57,12 +58,14 @@ const tasks = new CollectionState<DbTasks, AppTasks>({
   type="boolean"
   default="false"
   description="Listen for real-time updates."
+  isOptional
 />
 
 <Param
   name="query"
   type="(currentUser: User | null) => QueryConstraint[];"
   description="The query constraints"
+  isOptional
 />
 
 <Param
@@ -70,6 +73,7 @@ const tasks = new CollectionState<DbTasks, AppTasks>({
   type="(snapshot) => DataApp"
   description="Function that converts the Firestore data to the app data"
   default={`snap => ({ ...snap.data(), id: snap.id })`}
+  isOptional
   code={`// fromFirestore example
 
 type DbUser = {
@@ -115,6 +119,7 @@ $inspect(user.data);
   type="(data: DataApp) => DataDb"
   description="Function that converts the app data the firestore data"
   default="data => data"
+  isOptional
   code={`type DbUser = {
   name: string;
   age: number;
@@ -133,6 +138,26 @@ const users = new CollectionState<DbUser, AppUser>({
     return d;
   },  
 });`}
+/>
+
+<h2>Methods:</h2>
+
+<Param
+  name="add"
+  type="(data: AppData) => Promise<string | void>"
+  description="Add a document to the collection. Returns the id of the new document."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`const id = await tasks.add({ title: "New task", completed: false });`}
+/>
+
+<Param
+  name="delete"
+  type="(docId: string): Promise<void>"
+  description="Remove a document from the collection."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await tasks.delete("123");`}
 />
 
 <h2>More examples:</h2>

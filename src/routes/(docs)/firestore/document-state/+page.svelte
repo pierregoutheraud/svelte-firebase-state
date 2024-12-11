@@ -157,6 +157,22 @@ const user = new DocumentState<DbUser, AppUser>({
 });`}
 />
 
+<h2>Methods:</h2>
+
+<Param
+  name="save"
+  type="(key?: K, update?: DataApp[K] | ((prevValue: DataApp[K]) => DataApp[K])) => Promise<void>"
+  description="Save changes to the document."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await user.save("name", "Anna Smith");
+
+// or
+
+user.data.name = "Anna Smith";
+await user.save();`}
+/>
+
 <h2>More examples:</h2>
 
 <Example

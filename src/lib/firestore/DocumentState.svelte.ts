@@ -163,7 +163,7 @@ export class DocumentState<
     this.listen_to_doc();
   }
 
-  listen_to_query() {
+  private listen_to_query() {
     if (!this.queryRef) {
       return;
     }
@@ -184,7 +184,7 @@ export class DocumentState<
     return this.unsub;
   }
 
-  listen_to_doc() {
+  private listen_to_doc() {
     if (!this.docRef) {
       return;
     }
@@ -208,7 +208,7 @@ export class DocumentState<
     return this.unsub;
   }
 
-  save_data_to_firebase() {
+  private save_data_to_firebase() {
     if (!this.docRef) {
       return;
     }
@@ -227,6 +227,7 @@ export class DocumentState<
     if (!update || !this.docRef || !this.value) {
       return;
     }
+
     let newValue: DataApp[K];
     if (typeof update === "function") {
       const updateFn = update as (prevValue: DataApp[K]) => DataApp[K];

@@ -35,6 +35,7 @@
   name="auth"
   type="Auth"
   description="The firebase auth instance."
+  isOptional
   code={`import { auth } from "./firebase.js"; // Your firebase auth instance
 
 const user = new DocumentState<DbUser>({
@@ -51,14 +52,21 @@ const user = new DocumentState<DbUser>({
   type="boolean"
   description="Listen for real-time updates."
   default="false"
+  isOptional
 />
 
-<Param name="path" type="string" description="The path to the document." />
+<Param
+  name="path"
+  type="string"
+  description="The path to the document."
+  isOptional
+/>
 
 <Param
   name="collectionPath"
   type="string"
   description="The path to the collection. Should be used with the query param."
+  isOptional
   code={`
 const user = new DocumentState<DbUser>({
   firestore,
@@ -75,6 +83,7 @@ const user = new DocumentState<DbUser>({
   name="query"
   type="(user: User | null) => QueryConstraint[]"
   description="Function that returns the query constraints. Should be used with the collectionPath param."
+  isOptional
   code={`
 const user = new DocumentState<DbUser>({
   firestore,
@@ -92,6 +101,7 @@ const user = new DocumentState<DbUser>({
   type="(snapshot) => DataApp"
   description="Function that converts the Firestore data to the app data"
   default={`snap => ({ ...snap.data(), id: snap.id })`}
+  isOptional
   code={`// fromFirestore example
 
 type DbUser = {
@@ -137,6 +147,7 @@ $inspect(user.data);
   type="(data: DataApp) => DataDb"
   description="Function that converts the app data the firestore data"
   default="data => data"
+  isOptional
   code={`type DbUser = {
   name: string;
   age: number;

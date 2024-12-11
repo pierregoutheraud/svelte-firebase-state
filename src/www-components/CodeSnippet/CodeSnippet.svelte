@@ -13,24 +13,37 @@
 
   let { code, language = "svelte" }: Props = $props();
 
+  const PACKAGE_REPLACEMENTS = [
+    {
+      from: [
+        '"$lib/firestore/CollectionState.svelte.js"',
+        '"$lib/firestore/DocumentState.svelte.js"',
+        '"$lib/realtime-database/NodeState.svelte.js"',
+        '"$lib/realtime-database/NodeListState.svelte.js"'
+      ],
+      to: '"svelte-firebase-state"'
+    },
+    {
+      from: "@/www-lib/",
+      to: "./"
+    }
+  ];
+
   let codeFormatted = $derived.by(() => {
-    let s = replaceTabsBySpaces(code);
-    s = s.trim();
-    s = s.replace(
-      `"$lib/firestore/CollectionState.svelte.js"`,
-      `"svelte-firebase-state"`
+    return PACKAGE_REPLACEMENTS.reduce(
+      (formattedCode, { from, to }) => {
+        // Handle arrays of strings to replace
+        if (Array.isArray(from)) {
+          return from.reduce(
+            (code, fromPath) => code.replace(fromPath, to),
+            formattedCode
+          );
+        }
+        // Handle single string replacement
+        return formattedCode.replace(from, to);
+      },
+      removeStyleTags(replaceTabsBySpaces(code).trim())
     );
-    s = s.replace(
-      `"$lib/firestore/DocumentState.svelte.js"`,
-      `"svelte-firebase-state"`
-    );
-    s = s.replace(
-      `"$lib/realtime-database/NodeState.svelte.js"`,
-      `"svelte-firebase-state"`
-    );
-    s = s.replace(`@/www-lib/`, `./`);
-    s = removeStyleTags(s);
-    return s;
   });
 
   let html: string | undefined = $state(undefined);

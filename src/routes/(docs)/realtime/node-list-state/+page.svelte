@@ -38,6 +38,7 @@
   name="auth"
   type="Auth"
   description="The firebase auth instance."
+  isOptional
   code={`import { auth } from "./firebase.js"; // Your firebase auth instance
 
 const user = new NodeListState<DbUser>({
@@ -52,6 +53,7 @@ const user = new NodeListState<DbUser>({
   type="boolean"
   description="Listen for real-time updates."
   default="false"
+  isOptional
 />
 
 <h2>Methods:</h2>

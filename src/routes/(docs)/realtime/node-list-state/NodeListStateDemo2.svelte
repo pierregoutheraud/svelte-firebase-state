@@ -67,8 +67,8 @@
             alt="user"
           />
           <div class="content">
-            <div class="username-time">
-              <p>{message.username}</p>
+            <div class="infos">
+              <p class="username">{message.username}</p>
               <p class="time">
                 ({new Date(message.timestamp).toLocaleString()})
               </p>
@@ -110,12 +110,16 @@
     gap: 10px;
   }
 
+  .username {
+    font-weight: 600;
+  }
+
   .message {
     display: flex;
     gap: 10px;
   }
 
-  .username-time {
+  .infos {
     display: flex;
     align-items: baseline;
     gap: 10px;

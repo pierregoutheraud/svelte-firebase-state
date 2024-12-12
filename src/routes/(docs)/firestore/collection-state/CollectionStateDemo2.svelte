@@ -18,9 +18,13 @@
     query: () => [orderBy("name", "asc")]
   });
 
-  let name = $state("Mickey");
+  let name = $state("");
 
   function handleAdd() {
+    if (!name.length) {
+      window.alert("Please enter a username.");
+      return;
+    }
     users.add({ name });
   }
 
@@ -39,7 +43,7 @@
 
 <div class="demo">
   <div class="form">
-    <input type="text" bind:value={name} />
+    <input type="text" bind:value={name} placeholder="Username" />
     <button onclick={handleAdd}>Add user</button>
     <button onclick={handleAddRandom}>Add a random user</button>
   </div>

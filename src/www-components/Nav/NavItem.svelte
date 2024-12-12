@@ -37,4 +37,14 @@
     border-bottom: 2px solid var(--red-1);
     color: var(--red-1);
   }
+
+  @media screen and (max-width: 767px) {
+    .nav-item {
+      font-size: 16px;
+      padding: 0;
+    }
+    .nav-item.active {
+      border-bottom: 1px solid var(--red-1);
+    }
+  }
 </style>

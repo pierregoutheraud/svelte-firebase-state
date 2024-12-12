@@ -18,4 +18,10 @@
     display: flex;
     gap: 20px;
   }
+
+  @media screen and (max-width: 767px) {
+    .Nav {
+      gap: 20px;
+    }
+  }
 </style>

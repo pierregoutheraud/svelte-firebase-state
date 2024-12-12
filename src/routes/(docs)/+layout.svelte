@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { MediaQuery } from "svelte/reactivity";
   import { onMount, type Snippet } from "svelte";
   import { page } from "$app/stores";
   import Nav from "@/www-components/Nav/Nav.svelte";
   import NavItem from "@/www-components/Nav/NavItem.svelte";
   import GithubIcon from "@/www-components/GithubIcon/GithubIcon.svelte";
+  import { isDesktop, isMobile } from "@/www-lib/states.svelte.js";
 
   interface Props {
     children: Snippet;
@@ -24,7 +26,7 @@
   });
 </script>
 
-<main>
+<main class:isMobile={isMobile.current} class:isDesktop={isDesktop.current}>
   <header>
     <div class="title">
       <h1>svelte-firebase-state</h1>
@@ -34,13 +36,17 @@
 
     <div class="install">
       <div class="console">npm install svelte-firebase-state</div>
+
       <a
         href="https://github.com/pierregoutheraud/svelte-firebase-state"
         target="_blank"
         class="github"
         ><GithubIcon /> Github
       </a>
-      <div class="version">Version {PKG.version}</div>
+
+      {#if isDesktop.current}
+        <div class="version">Version {PKG.version}</div>
+      {/if}
     </div>
 
     <a
@@ -52,29 +58,38 @@
     </a>
   </header>
 
-  <section class="content">
-    <Nav>
-      <NavItem href={"/"} active={$page.url.pathname === "/"}>
-        What is it?
-      </NavItem>
-      <NavItem
-        href="/firestore/collection-state"
-        active={$page.url.pathname.includes("/firestore")}
-      >
-        Firestore
-      </NavItem>
-      <NavItem
-        href="/realtime/node-list-state"
-        active={$page.url.pathname.includes("/realtime")}
-      >
-        Realtime Database
-      </NavItem>
-    </Nav>
+  {#if isDesktop.current}
+    <section class="content">
+      <Nav>
+        <NavItem href={"/"} active={$page.url.pathname === "/"}>
+          What is it?
+        </NavItem>
+        <NavItem
+          href="/firestore/collection-state"
+          active={$page.url.pathname.includes("/firestore")}
+        >
+          Firestore
+        </NavItem>
+        <NavItem
+          href="/realtime/node-list-state"
+          active={$page.url.pathname.includes("/realtime")}
+        >
+          {isDesktop.current ? "Realtime " : ""}Database
+        </NavItem>
+      </Nav>
 
-    <div class="children">
-      {@render children()}
-    </div>
-  </section>
+      <div class="children">
+        {@render children()}
+      </div>
+    </section>
+  {:else}
+    <section class="content">
+      <p>
+        Mobile version in progress. Please visit on desktop for full
+        documentation. Thank you!
+      </p>
+    </section>
+  {/if}
 </main>
 
 <style>
@@ -94,10 +109,23 @@
     padding: 60px 0;
     width: 100%;
   }
+
+  header h1 {
+    text-align: center;
+    margin: 0px;
+    font-weight: 800;
+    background-color: var(--red-1);
+    color: white;
+    display: inline-flex;
+    padding: 16px 20px;
+    align-self: center;
+    font-size: 40px;
+  }
   header h2 {
     font-size: 30px;
     font-weight: 400;
   }
+
   .playground {
     font-size: 14px;
     color: var(--red-1);
@@ -152,28 +180,11 @@
     font-weight: 600;
     word-spacing: 6px;
   }
-
-  main h1 {
-    text-align: center;
-    margin: 0px;
-    font-weight: 800;
-    background-color: var(--red-1);
-    color: white;
-    display: inline-flex;
-    padding: 16px 20px;
-    align-self: center;
-    font-size: 40px;
-  }
-
   .content {
     display: flex;
     flex-direction: column;
     width: 100%;
     padding: 30px;
-  }
-
-  .content :global(.Nav) {
-    align-self: center;
   }
 
   .children {
@@ -184,5 +195,54 @@
     padding: 20px 0 500px;
     width: 1000px;
     position: relative;
+  }
+
+  @media screen and (max-width: 767px) {
+    main {
+      height: 100%;
+    }
+    header {
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+    }
+
+    header h1 {
+      font-size: 24px;
+    }
+    header h2 {
+      font-size: 18px;
+    }
+
+    header {
+      gap: 20px;
+      padding: 30px 0;
+    }
+    .github {
+      font-size: 14px;
+    }
+
+    .install {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .playground {
+      display: none;
+    }
+
+    .console {
+      font-size: 14px;
+      padding: 8px 16px;
+      word-spacing: 2px;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .content p {
+      font-weight: 600;
+    }
   }
 </style>

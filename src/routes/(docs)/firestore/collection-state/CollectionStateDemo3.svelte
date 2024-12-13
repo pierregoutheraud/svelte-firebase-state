@@ -1,6 +1,5 @@
 <script lang="ts">
   import { CollectionState } from "$lib/firestore/CollectionState.svelte.js";
-  import { CollectionAggregateState } from "@/lib/firestore/CollectionAggregateState.svelte.js";
   import { firestore } from "@/www-lib/firebase.js";
   import { average, count, sum } from "firebase/firestore";
 
@@ -30,18 +29,6 @@
     }
   });
 
-  // OR if you only want the aggregate data
-
-  const aggregateState = new CollectionAggregateState<AggregateData>({
-    firestore,
-    path: () => "users_2",
-    aggregate: {
-      count: count(),
-      averageAge: average("age"),
-      totalAge: sum("age")
-    }
-  });
-
   // How you can refetch data:
   function handleRefetch() {
     // Refetch collection data
@@ -49,7 +36,6 @@
 
     // Refetch aggregate data
     users.refetch_aggregate_data();
-    aggregateState.refetch();
   }
 </script>
 
@@ -57,6 +43,3 @@
 <br />
 <br />
 {JSON.stringify(users.aggregateData)}
-<br />
-<br />
-{JSON.stringify(aggregateState.data)}

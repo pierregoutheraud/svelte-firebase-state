@@ -182,6 +182,30 @@ $inspect(users.aggregateData);
 // You should use users.refetch_aggregate_data() to refetch the aggregate data.`}
 />
 
+<h2>Properties:</h2>
+
+<Param
+  name="data"
+  type="AppData[] | null | undefined"
+  description={`Reactive state that holds the collection data.
+The data is undefined when loading.
+The data is null when the collection could not be found.`}
+  backgroundColor="var(--green-light-2)"
+  borderColor="var(--green-light-1)"
+  code={`{#each users.data as user (user.id)}
+  <p>{user.name}</p>
+{/each}`}
+/>
+
+<Param
+  name="loading"
+  type="boolean"
+  description="Reactive state indicating if the collection data is loading."
+  backgroundColor="var(--green-light-1)"
+  borderColor="var(--green-light-2)"
+  code={`$inspect(users.loading);`}
+/>
+
 <h2>Methods:</h2>
 
 <Param

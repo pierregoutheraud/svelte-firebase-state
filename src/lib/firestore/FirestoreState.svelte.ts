@@ -45,6 +45,7 @@ export class FirestoreState<
 
   protected loading = $state(false);
   protected unsub: Unsubscribe | undefined;
+  protected initRefPromise: Promise<unknown> | undefined;
 
   constructor({
     auth,
@@ -78,8 +79,7 @@ export class FirestoreState<
     };
   }
 
-  async get_path_string(): Promise<string | null> {
-    const user = await this.getUser;
+  get_path_string(user: User | null): string | null {
     if (typeof this.pathFunctionOrString === "function") {
       return this.pathFunctionOrString(user) ?? null;
     } else if (typeof this.pathFunctionOrString === "string") {
@@ -88,10 +88,12 @@ export class FirestoreState<
     return null;
   }
 
-  // Common start/stop logic can be defined here if needed
-  start(): void {
+  async start(): Promise<void> {
+    // Wait for queryRef/docRef to be initialized
+    this.initRefPromise = this.init_ref();
+    await this.initRefPromise;
+
     if (this.listenAtStart) {
-      // Let child classes implement their own 'listen' method
       this.listen();
     } else {
       this.fetch_data();
@@ -113,8 +115,11 @@ export class FirestoreState<
     this.value = data;
   }
 
-  // Abstract methods for children to implement their fetching logic
   protected async fetch_data(): Promise<void> {}
+
+  protected async init_ref(): Promise<unknown> {
+    return;
+  }
 
   protected async listen(): Promise<void> {}
 

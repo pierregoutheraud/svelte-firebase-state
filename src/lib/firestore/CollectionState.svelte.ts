@@ -64,14 +64,14 @@ export class CollectionState<
     return collection(this.firestore, ...pathArray);
   }
 
-  private async get_query_ref(): Promise<Query | undefined> {
+  protected async init_ref(): Promise<Query | undefined> {
     if (this.queryRef) {
       return this.queryRef;
     }
 
     const user = await this.getUser;
 
-    let pathStr = await this.get_path_string();
+    let pathStr = this.get_path_string(user);
 
     if (!pathStr) {
       throw new Error("Path string is not set");
@@ -80,9 +80,20 @@ export class CollectionState<
     this.collectionRef = this.get_collection_from_path(pathStr);
 
     const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
+
     this.queryRef = firestoreQuery(this.collectionRef, ...queryParams);
 
     return this.queryRef;
+  }
+
+  public async get_query_ref(): Promise<Query | undefined> {
+    await this.init_ref();
+    return this.queryRef;
+  }
+
+  public async get_collection_ref(): Promise<Query | undefined> {
+    await this.init_ref();
+    return this.collectionRef;
   }
 
   private map_data(doc: QueryDocumentSnapshot<DataApp, DocumentData>): DataApp {
@@ -92,12 +103,13 @@ export class CollectionState<
   protected async fetch_data(): Promise<void> {
     this.loading = true;
 
-    const queryRef = await this.get_query_ref();
-    if (!queryRef) {
-      return;
+    if (!this.queryRef) {
+      throw new Error("Query reference is not set");
     }
 
-    const querySnapshot = await getDocs(queryRef.withConverter(this.converter));
+    const querySnapshot = await getDocs(
+      this.queryRef.withConverter(this.converter)
+    );
     this.value = querySnapshot.docs.map(this.map_data);
 
     this.loading = false;
@@ -108,13 +120,12 @@ export class CollectionState<
       return;
     }
 
-    const queryRef = await this.get_query_ref();
-    if (!queryRef) {
-      return;
+    if (!this.queryRef) {
+      throw new Error("Query reference is not set");
     }
 
     this.unsub = onSnapshot(
-      queryRef.withConverter(this.converter),
+      this.queryRef.withConverter(this.converter),
       (querySnapshot) => {
         if (querySnapshot.empty) {
           callback?.([]);
@@ -139,7 +150,7 @@ export class CollectionState<
 
   async add(data: DataDb): Promise<string | void> {
     if (!this.collectionRef) {
-      console.log("Collection reference is not set");
+      console.error("Collection reference is not set");
       return;
     }
 

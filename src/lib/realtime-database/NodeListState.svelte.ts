@@ -45,7 +45,7 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     this.queryParamsFn = queryParamsFn;
   }
 
-  protected async set_ref(): Promise<void> {
+  protected async init_ref(): Promise<void> {
     const pathStr = await this.get_path_string();
     if (!pathStr) {
       throw new Error("Path is not defined");

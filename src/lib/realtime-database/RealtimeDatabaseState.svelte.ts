@@ -46,11 +46,11 @@ export class RealtimeDatabaseState<Data> extends SubscriberState<Data | null> {
     return null;
   }
 
-  protected async set_ref(): Promise<void> {}
+  protected async init_ref(): Promise<void> {}
 
   // Common start/stop logic can be defined here if needed
   async start() {
-    await this.set_ref();
+    await this.init_ref();
 
     if (this.listenAtStart) {
       // Let child classes implement their own 'listen' method

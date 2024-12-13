@@ -68,7 +68,7 @@ export class DocumentState<
     this.queryParams = queryParams;
   }
 
-  private async get_doc_ref(): Promise<typeof this.docRef | undefined> {
+  protected async init_ref(): Promise<DocumentReference | undefined | null> {
     if (this.docRef) {
       return this.docRef;
     }
@@ -76,7 +76,7 @@ export class DocumentState<
     const user = await this.getUser;
 
     if (this.pathFunctionOrString) {
-      let pathStr = await this.get_path_string();
+      let pathStr = this.get_path_string(user);
 
       if (!pathStr) {
         this.docRef = null;
@@ -129,8 +129,6 @@ export class DocumentState<
   protected async fetch_data(): Promise<void> {
     this.loading = true;
 
-    await this.get_doc_ref();
-
     if (!this.docRef) {
       this.value = null;
       return;
@@ -151,8 +149,6 @@ export class DocumentState<
     if (this.unsub) {
       return;
     }
-
-    await this.get_doc_ref();
 
     if (!this.docRef) {
       // If there is no docRef, we can still try to listen to the queryRef
@@ -206,6 +202,11 @@ export class DocumentState<
     });
 
     return this.unsub;
+  }
+
+  public async get_doc_ref(): Promise<DocumentReference | undefined | null> {
+    await this.init_ref();
+    return this.docRef;
   }
 
   private save_data_to_firebase() {

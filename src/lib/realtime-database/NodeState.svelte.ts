@@ -45,7 +45,7 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
     // this.cleanup = this.initialize_effects();
   }
 
-  protected async set_ref(): Promise<void> {
+  protected async init_ref(): Promise<void> {
     const pathStr = await this.get_path_string();
     if (!pathStr) {
       throw new Error("Path is not defined");

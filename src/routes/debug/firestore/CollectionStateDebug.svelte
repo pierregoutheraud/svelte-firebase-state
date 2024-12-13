@@ -31,7 +31,7 @@
     // ];
   }
 
-  function handleRemove(user: FirestoreUser & { id: string }) {
+  function handleRemove(user: User & { id: string }) {
     firestoreUsersState.delete(user.id);
   }
 </script>

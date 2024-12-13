@@ -1,14 +1,7 @@
 <script>
   import CodeSnippet from "@/www-components/CodeSnippet/CodeSnippet.svelte";
-</script>
 
-<div class="image">
-  <div class="title">
-    <h1>svelte-firebase-state</h1>
-    <h2>Firebase utilities for Svelte 5.</h2>
-  </div>
-  <CodeSnippet
-    code={`<script>
+  const code = `<script>
 import { CollectionState } from 'svelte-firebase-state';
 import { firestore, auth } from "./firebase.js";
 
@@ -18,12 +11,19 @@ const tasks = new CollectionState<Task>({
   path: (user) => \`/users/\${user?.uid}/tasks\`,
   listen: true,
 });
-</script>
+<\/script>
 
 {#each tasks.data as task (task.id)}
   <p>{task.name}</p>
-{/each}`}
-  />
+{/each}`;
+</script>
+
+<div class="image">
+  <div class="title">
+    <h1>svelte-firebase-state</h1>
+    <h2>Firebase utilities for Svelte 5.</h2>
+  </div>
+  <CodeSnippet {code} />
 </div>
 
 <style>

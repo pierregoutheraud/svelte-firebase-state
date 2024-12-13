@@ -76,7 +76,7 @@ export class DocumentState<
     const user = await this.getUser;
 
     if (this.pathFunctionOrString) {
-      let pathStr = this.get_path_string(user);
+      const pathStr = this.get_path_string(user);
 
       if (!pathStr) {
         this.docRef = null;
@@ -130,16 +130,16 @@ export class DocumentState<
     this.loading = true;
 
     if (!this.docRef) {
-      this.value = null;
+      this.data = null;
       return;
     }
 
     const docSnap = await getDoc(this.docRef);
 
     if (!docSnap.exists()) {
-      this.value = null;
+      this.data = null;
     } else {
-      this.value = docSnap.data() as DataApp;
+      this.data = docSnap.data() as DataApp;
     }
 
     this.loading = false;
@@ -173,7 +173,7 @@ export class DocumentState<
         this.unsub?.();
         this.listen_to_doc();
       } else {
-        this.value = null;
+        this.data = null;
       }
     });
 
@@ -188,7 +188,7 @@ export class DocumentState<
     this.unsub?.();
     this.unsub = onSnapshot(this.docRef, (docSnap) => {
       if (!docSnap.exists()) {
-        this.value = null;
+        this.data = null;
         // If the document doesn't exist
         // We can still try to listen to the queryRef
         this.listen_to_query();
@@ -198,7 +198,7 @@ export class DocumentState<
 
       // TODO: Check if the data we receive is the same as the one we have
       // in this case we don't need to update the value
-      this.value = newData;
+      this.data = newData;
     });
 
     return this.unsub;
@@ -213,7 +213,7 @@ export class DocumentState<
     if (!this.docRef) {
       return;
     }
-    return setDoc(this.docRef, this.value || null, { merge: true });
+    return setDoc(this.docRef, this.data || null, { merge: true });
   }
 
   public save<K extends keyof DataApp>(
@@ -225,20 +225,20 @@ export class DocumentState<
       return;
     }
 
-    if (!update || !this.docRef || !this.value) {
+    if (!update || !this.docRef || !this.data) {
       return;
     }
 
     let newValue: DataApp[K];
     if (typeof update === "function") {
       const updateFn = update as (prevValue: DataApp[K]) => DataApp[K];
-      const prevValue = this.value[key];
+      const prevValue = this.data[key];
       newValue = updateFn(prevValue);
     } else {
       newValue = update;
     }
 
-    this.value[key] = newValue as NonNullable<DataApp>[K];
+    this.data[key] = newValue as NonNullable<DataApp>[K];
 
     this.save_data_to_firebase();
   }

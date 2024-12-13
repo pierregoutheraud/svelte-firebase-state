@@ -9,7 +9,8 @@ import {
   type Query,
   type DocumentData,
   type QueryDocumentSnapshot,
-  type CollectionReference
+  type CollectionReference,
+  type AggregateSpec
 } from "firebase/firestore";
 import {
   FirestoreState,
@@ -17,6 +18,7 @@ import {
   type PathParam,
   type QueryParamsFn
 } from "./FirestoreState.svelte.js";
+import { CollectionAggregateState } from "./CollectionAggregateState.svelte.js";
 
 type CollectionStateOptions<
   DataDb extends DocumentData,
@@ -24,15 +26,18 @@ type CollectionStateOptions<
 > = Omit<FirestoreStateOptions<DataDb, DataApp>, "pathFunctionOrString"> & {
   path: PathParam;
   query?: QueryParamsFn;
+  aggregate?: AggregateSpec;
 };
 
 export class CollectionState<
   DataDb extends DocumentData,
-  DataApp extends DataDb & { id: string } = DataDb & { id: string }
+  DataApp extends DataDb & { id: string } = DataDb & { id: string },
+  AggregateData = any
 > extends FirestoreState<DataDb, DataApp, DataApp[]> {
   private readonly queryParamsFn?: QueryParamsFn;
+  private readonly aggregateState?: CollectionAggregateState<AggregateData>;
 
-  private queryRef: Query | undefined;
+  private queryRef: Query<DataApp, DataDb> | undefined;
   private collectionRef: CollectionReference | undefined;
 
   constructor({
@@ -42,7 +47,8 @@ export class CollectionState<
     path: pathFunctionOrString,
     listen: listenAtStart = false,
     fromFirestore,
-    toFirestore
+    toFirestore,
+    aggregate
   }: CollectionStateOptions<DataDb, DataApp>) {
     super({
       auth,
@@ -54,6 +60,15 @@ export class CollectionState<
     });
 
     this.queryParamsFn = queryParamsFn;
+
+    if (aggregate) {
+      this.aggregateState = new CollectionAggregateState<AggregateData>({
+        auth,
+        firestore,
+        path: pathFunctionOrString,
+        aggregate
+      });
+    }
   }
 
   private get_collection_from_path(path: string) {
@@ -81,7 +96,10 @@ export class CollectionState<
 
     const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
 
-    this.queryRef = firestoreQuery(this.collectionRef, ...queryParams);
+    this.queryRef = firestoreQuery(
+      this.collectionRef,
+      ...queryParams
+    ).withConverter(this.converter);
 
     return this.queryRef;
   }
@@ -107,10 +125,8 @@ export class CollectionState<
       throw new Error("Query reference is not set");
     }
 
-    const querySnapshot = await getDocs(
-      this.queryRef.withConverter(this.converter)
-    );
-    this.value = querySnapshot.docs.map(this.map_data);
+    const querySnapshot = await getDocs(this.queryRef);
+    this.data = querySnapshot.docs.map(this.map_data);
 
     this.loading = false;
   }
@@ -124,19 +140,16 @@ export class CollectionState<
       throw new Error("Query reference is not set");
     }
 
-    this.unsub = onSnapshot(
-      this.queryRef.withConverter(this.converter),
-      (querySnapshot) => {
-        if (querySnapshot.empty) {
-          callback?.([]);
-          this.value = [];
-          return;
-        }
-        const newData = querySnapshot.docs.map(this.map_data);
-        this.value = newData;
-        callback?.(this.value);
+    this.unsub = onSnapshot(this.queryRef, (querySnapshot) => {
+      if (querySnapshot.empty) {
+        callback?.([]);
+        this.data = [];
+        return;
       }
-    );
+      const newData = querySnapshot.docs.map(this.map_data);
+      this.data = newData;
+      callback?.(this.data);
+    });
 
     return;
   }
@@ -154,12 +167,12 @@ export class CollectionState<
       return;
     }
 
-    const currentData = this.value || [];
+    const currentData = this.data || [];
     const randomId = Math.random().toString(36).substring(7);
     const newData = { id: randomId, ...data } as DataApp;
-    this.value = [...currentData, newData];
+    this.data = [...currentData, newData];
     const docRef = await addDoc(this.collectionRef, data as DocumentData);
-    this.value = this.value.map((d) => {
+    this.data = this.data.map((d) => {
       if (d.id === randomId) {
         return { id: docRef.id, ...data } as DataApp;
       }
@@ -183,5 +196,13 @@ export class CollectionState<
 
     const docRef = this.get_doc_ref(id);
     return deleteDoc(docRef);
+  }
+
+  get aggregateData(): AggregateData | null | undefined {
+    return this.aggregateState?.data;
+  }
+
+  refetch_aggregate_data(): void {
+    this.aggregateState?.refetch();
   }
 }

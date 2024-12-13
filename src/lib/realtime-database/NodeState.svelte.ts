@@ -62,7 +62,7 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
       this.nodeRef,
       (snapshot) => {
         // this.isUpdatingFromDB = true;
-        this.value = snapshot.val() as Data;
+        this.dataState.value = snapshot.val() as Data;
         // this.firstFetchDone = true;
       },
       (error) => {
@@ -77,13 +77,8 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
     }
 
     const snapshot = await get(this.nodeRef);
-    this.value = snapshot.val() as Data;
-    return this.value;
-  }
-
-  stop(): void {
-    this.unsub?.();
-    this.unsub = undefined;
+    this.dataState.value = snapshot.val() as Data;
+    return this.dataState.value;
   }
 
   /*
@@ -92,24 +87,24 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
   // return $effect.root(() => {
   // 	effect_deps(
   // 		() => {
-  // 			console.log("effect_deps", this.value?.age);
+  // 			console.log("effect_deps", this.data?.age);
   // 			this.save_data_to_firebase();
   // 			// this.initialize_effects();
   // 		},
-  // 		() => [(this.value as any)?.age]
+  // 		() => [(this.data as any)?.age]
   // 	);
 			$effect(() => {
-				console.log(this.value?.age);
+				console.log(this.data?.age);
 			});
 
 			$effect(() => {
-				if (!this.value) {
+				if (!this.data) {
 					return () => console.log("$effect cleanup 1");
 				}
 
-				console.log("$effect", this.value.age);
+				console.log("$effect", this.data.age);
 
-				if (!this.value || this.isUpdatingFromDB) {
+				if (!this.data || this.isUpdatingFromDB) {
 					this.isUpdatingFromDB = false;
 					return () => console.log("$effect cleanup 2");
 				}
@@ -126,14 +121,14 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
   //
   // return $effect.root(() => {
   // 	$effect(() => {
-  // 		console.log("$effect", this.value, this.isUpdatingFromDB);
+  // 		console.log("$effect", this.data, this.isUpdatingFromDB);
   //
   // 		// Watch all keys in the object
-  // 		Object.keys(this.value || {}).forEach((key) => {
+  // 		Object.keys(this.data || {}).forEach((key) => {
   // 			console.log("key", key);
   // 		});
   //
-  // 		if (!this.value || this.isUpdatingFromDB) {
+  // 		if (!this.data || this.isUpdatingFromDB) {
   // 			this.isUpdatingFromDB = false;
   // 			return () => {};
   // 		}
@@ -152,21 +147,22 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
   */
 
   private save_data_to_firebase() {
-    if (!this.nodeRef || !this.value) {
+    if (!this.nodeRef || !this.data) {
       return;
     }
-    set(this.nodeRef, this.value);
+    set(this.nodeRef, this.data);
   }
 
   set data(newValue: Data | undefined) {
-    this.value = newValue;
+    this.dataState.value = newValue;
     if (this.autosave) {
       this.save_data_to_firebase();
     }
   }
 
-  get data(): Data | null | undefined {
-    return this.value;
+  //!\ If set data is defined, we need to defined get data here as well
+  get data(): Data | undefined | null {
+    return this.dataState.value;
   }
 
   public save<K extends keyof Data>(
@@ -178,20 +174,20 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
       return;
     }
 
-    if (!update || !this.nodeRef || !this.value) {
+    if (!update || !this.nodeRef || !this.data) {
       return;
     }
 
     let newValue: Data[K];
     if (typeof update === "function") {
       const updateFn = update as (prevValue: Data[K]) => Data[K];
-      const prevValue = this.value[key];
+      const prevValue = this.data[key];
       newValue = updateFn(prevValue);
     } else {
       newValue = update;
     }
 
-    this.value[key] = newValue as NonNullable<Data>[K];
+    this.data[key] = newValue as NonNullable<Data>[K];
     this.save_data_to_firebase();
   }
 }

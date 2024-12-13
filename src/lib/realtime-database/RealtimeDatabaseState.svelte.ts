@@ -11,14 +11,15 @@ export type RealtimeDatabaseStateOptions = {
   pathFunctionOrString?: PathParam;
 };
 
-export class RealtimeDatabaseState<Data> extends SubscriberState<Data | null> {
+export class RealtimeDatabaseState<Data> {
   protected readonly auth?: Auth;
   protected readonly database: Database;
   protected readonly listenAtStart: boolean;
   protected readonly getUser: Promise<User | null>;
   protected readonly pathFunctionOrString?: PathParam;
+  protected readonly dataState: SubscriberState<Data | null | undefined>;
 
-  protected loading = $state(false);
+  public loading = $state(false);
   protected unsub?: Unsubscribe | undefined;
 
   constructor({
@@ -27,7 +28,11 @@ export class RealtimeDatabaseState<Data> extends SubscriberState<Data | null> {
     listen,
     pathFunctionOrString
   }: RealtimeDatabaseStateOptions) {
-    super();
+    this.dataState = new SubscriberState<Data | undefined | null>({
+      defaultValue: undefined,
+      start: this.start.bind(this),
+      stop: this.stop.bind(this)
+    });
 
     this.auth = auth;
     this.database = database;
@@ -68,11 +73,11 @@ export class RealtimeDatabaseState<Data> extends SubscriberState<Data | null> {
   }
 
   get data(): Data | null | undefined {
-    return this.value;
+    return this.dataState.value;
   }
 
   set data(data: Data | null) {
-    this.value = data;
+    this.dataState.value = data;
   }
 
   // Abstract methods for children to implement their fetching logic
@@ -84,9 +89,5 @@ export class RealtimeDatabaseState<Data> extends SubscriberState<Data | null> {
 
   protected refetch(): Promise<Data | null> {
     return this.fetch_data();
-  }
-
-  get is_loading(): boolean {
-    return this.loading;
   }
 }

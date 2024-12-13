@@ -5,6 +5,8 @@
   import CollectionStateDemo1Code from "./CollectionStateDemo1.svelte?raw";
   import CollectionStateDemo2 from "./CollectionStateDemo2.svelte";
   import CollectionStateDemo2Code from "./CollectionStateDemo2.svelte?raw";
+  import CollectionStateDemo3 from "./CollectionStateDemo3.svelte";
+  import CollectionStateDemo3Code from "./CollectionStateDemo3.svelte?raw";
 </script>
 
 <div class="title">
@@ -140,6 +142,46 @@ const users = new CollectionState<DbUser, AppUser>({
 });`}
 />
 
+<Param
+  name="aggregate"
+  type="AggregateSpec"
+  description="An object defining aggregate queries to be performed on the collection. More info: https://firebase.google.com/docs/firestore/query-data/aggregation-queries"
+  isOptional
+  code={`type DbUser = {
+  name: string;
+  age: number;
+};
+
+type AppUser = DbUser & {
+  id: string;
+};
+
+type AggregateData = {
+  count: number;
+  averageAge: number;
+  totalAge: number;
+};
+
+const users = new CollectionState<DbUser, AppUser, AggregateData>({
+  firestore,
+  listen: true,
+  path: () => "users_2",
+  aggregate: {
+    count: count(),
+    averageAge: average("age"),
+    totalAge: sum("age")
+  }
+});
+  
+$inspect(users.data);
+$inspect(users.aggregateData);
+
+// Firestore doesn't support real-time updates for aggregations.
+// So this class does not implement a realtime listener 
+// as this is not efficient and should be avoided.
+// You should use users.refetch_aggregate_data() to refetch the aggregate data.`}
+/>
+
 <h2>Methods:</h2>
 
 <Param
@@ -153,7 +195,7 @@ const users = new CollectionState<DbUser, AppUser>({
 
 <Param
   name="delete"
-  type="(docId: string): Promise<void>"
+  type="(docId: string) => Promise<void>"
   description="Remove a document from the collection."
   backgroundColor="var(--light-pastel-blue-2)"
   borderColor="var(--light-pastel-blue-1)"
@@ -162,17 +204,33 @@ const users = new CollectionState<DbUser, AppUser>({
 
 <Param
   name="refetch"
-  type="(): Promise<void>"
+  type="() => Promise<void>"
   description="Refetch the collection data."
   backgroundColor="var(--light-pastel-blue-2)"
   borderColor="var(--light-pastel-blue-1)"
   code={`await tasks.refetch();`}
 />
 
+<Param
+  name="refetch_aggregate_data"
+  type="() => Promise<void>"
+  description="Refetch the aggregate collection data."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await tasks.refetch_aggregate_data();`}
+/>
+
 <h2>More examples:</h2>
 
-<Example text="Example: Listen to a collection" code={CollectionStateDemo2Code}>
+<Example text="Listen to a collection" code={CollectionStateDemo2Code}>
   <CollectionStateDemo2 />
+</Example>
+
+<Example
+  text="Fetch collection aggregations data"
+  code={CollectionStateDemo3Code}
+>
+  <CollectionStateDemo3 />
 </Example>
 
 <style>

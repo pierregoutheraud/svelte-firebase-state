@@ -29,8 +29,9 @@
       <br />
       <br />
       You can also instantiate the state class in a .svelte.ts file making it global
-      to your app, in this case the data will be fetched only when the data is subscribed
-      to (shown in a component ui or used in a reactive environment like $effect).
+      to your app, in this case
+      <span>the data will be fetched only when the state is subscribed to</span>
+      (shown in a component ui or used in a reactive environment like $effect).
     </p>
 
     <CodeSnippet
@@ -99,5 +100,8 @@ $inspect(tasks.data);`}
     flex-direction: column;
     gap: 10px;
     margin-bottom: 30px;
+  }
+  .paragraph p span {
+    font-weight: 700;
   }
 </style>

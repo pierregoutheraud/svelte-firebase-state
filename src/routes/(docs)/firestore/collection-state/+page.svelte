@@ -160,6 +160,15 @@ const users = new CollectionState<DbUser, AppUser>({
   code={`await tasks.delete("123");`}
 />
 
+<Param
+  name="refetch"
+  type="(): Promise<void>"
+  description="Refetch the collection data."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await tasks.refetch();`}
+/>
+
 <h2>More examples:</h2>
 
 <Example text="Example: Listen to a collection" code={CollectionStateDemo2Code}>

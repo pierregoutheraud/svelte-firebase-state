@@ -75,7 +75,7 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     }
 
     this.unsub = onValue(this.queryRef, (snapshot) => {
-      this.value = this.createArrayFromSnapshot(snapshot);
+      this.data = this.createArrayFromSnapshot(snapshot);
     });
   }
 
@@ -85,8 +85,8 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     }
 
     const snapshot = await get(this.queryRef);
-    this.value = this.createArrayFromSnapshot(snapshot);
-    return this.value;
+    this.data = this.createArrayFromSnapshot(snapshot);
+    return this.data;
   }
 
   stop(): void {

@@ -35,17 +35,19 @@ export class FirestoreState<
   DataDb extends DocumentData,
   DataApp extends DataDb & { id: string },
   State
-> extends SubscriberState<State | null> {
+> {
   protected readonly auth?: Auth;
   protected readonly firestore: Firestore;
   protected readonly listenAtStart: boolean;
   protected readonly getUser: Promise<User | null>;
   protected readonly converter: FirestoreDataConverter<DataApp, DataDb>;
   protected readonly pathFunctionOrString?: PathParam;
+  protected readonly dataState: SubscriberState<State | null | undefined>;
 
-  protected loading = $state(false);
   protected unsub: Unsubscribe | undefined;
   protected initRefPromise: Promise<unknown> | undefined;
+
+  public loading = $state(false);
 
   constructor({
     auth,
@@ -55,7 +57,11 @@ export class FirestoreState<
     toFirestore,
     pathFunctionOrString
   }: FirestoreStateOptions<DataDb, DataApp>) {
-    super();
+    this.dataState = new SubscriberState<State | undefined | null>({
+      defaultValue: undefined,
+      start: this.start.bind(this),
+      stop: this.stop.bind(this)
+    });
 
     this.auth = auth;
     this.firestore = firestore;
@@ -108,11 +114,10 @@ export class FirestoreState<
   }
 
   get data(): State | null | undefined {
-    return this.value;
+    return this.dataState.value;
   }
-
   set data(data: State | null) {
-    this.value = data;
+    this.dataState.value = data;
   }
 
   protected async fetch_data(): Promise<void> {}
@@ -123,11 +128,7 @@ export class FirestoreState<
 
   protected async listen(): Promise<void> {}
 
-  protected refetch(): Promise<void> {
+  public refetch(): Promise<void> {
     return this.fetch_data();
-  }
-
-  get is_loading(): boolean {
-    return this.loading;
   }
 }

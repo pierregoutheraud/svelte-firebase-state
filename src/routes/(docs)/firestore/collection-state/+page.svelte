@@ -5,6 +5,8 @@
   import CollectionStateDemo1Code from "./CollectionStateDemo1.svelte?raw";
   import CollectionStateDemo2 from "./CollectionStateDemo2.svelte";
   import CollectionStateDemo2Code from "./CollectionStateDemo2.svelte?raw";
+  import CollectionStateDemo3 from "./CollectionStateDemo3.svelte";
+  import CollectionStateDemo3Code from "./CollectionStateDemo3.svelte?raw";
 </script>
 
 <div class="title">
@@ -66,6 +68,36 @@ const tasks = new CollectionState<DbTasks, AppTasks>({
   type="(currentUser: User | null) => QueryConstraint[];"
   description="The query constraints"
   isOptional
+/>
+
+<Param
+  name="aggregate"
+  type={"Record<string, AggregateFieldType>"}
+  description="An object defining aggregate queries to be performed on the collection. Each key represents a field name for the result of the aggregation, and the value specifies the aggregation function and (for some functions) the field to aggregate on. The aggregation results are updated when the collection changes if 'listen' is set to true.",
+  isOptional
+  code={`// aggregate example
+
+import { count, average, sum } from "firebase/firestore";
+
+const users = new CollectionState<DbTasks, AppTasks>({
+  firestore,
+  path: "your/firestore/collection/path",
+  aggregate: {
+    count: count(),
+    averageAge: average("age"),
+    totalAge: sum("age"),
+  },
+});
+
+$inspect(users.data);
+/*
+{
+  count: 2,
+  averageAge: 30,
+  totalAge: 60,
+}
+*/
+`}
 />
 
 <Param
@@ -164,6 +196,10 @@ const users = new CollectionState<DbUser, AppUser>({
 
 <Example text="Example: Listen to a collection" code={CollectionStateDemo2Code}>
   <CollectionStateDemo2 />
+</Example>
+
+<Example text="Example: Summarize collection data with aggregation queries" code={CollectionStateDemo3Code}>
+  <CollectionStateDemo3 />
 </Example>
 
 <style>

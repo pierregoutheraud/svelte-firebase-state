@@ -1,6 +1,7 @@
 import {
   collection,
   getDocs,
+  getAggregateFromServer,
   query as firestoreQuery,
   onSnapshot,
   addDoc,
@@ -9,7 +10,8 @@ import {
   type Query,
   type DocumentData,
   type QueryDocumentSnapshot,
-  type CollectionReference
+  type CollectionReference,
+  type AggregateSpec
 } from "firebase/firestore";
 import {
   FirestoreState,
@@ -24,6 +26,7 @@ type CollectionStateOptions<
 > = Omit<FirestoreStateOptions<DataDb, DataApp>, "pathFunctionOrString"> & {
   path: PathParam;
   query?: QueryParamsFn;
+  aggregate?: AggregateSpec;
 };
 
 export class CollectionState<
@@ -31,6 +34,8 @@ export class CollectionState<
   DataApp extends DataDb & { id: string } = DataDb & { id: string }
 > extends FirestoreState<DataDb, DataApp, DataApp[]> {
   private readonly queryParamsFn?: QueryParamsFn;
+
+  private readonly aggregate?: AggregateSpec;
 
   private queryRef: Query | undefined;
   private collectionRef: CollectionReference | undefined;
@@ -41,6 +46,7 @@ export class CollectionState<
     query: queryParamsFn,
     path: pathFunctionOrString,
     listen: listenAtStart = false,
+    aggregate,
     fromFirestore,
     toFirestore
   }: CollectionStateOptions<DataDb, DataApp>) {
@@ -54,6 +60,7 @@ export class CollectionState<
     });
 
     this.queryParamsFn = queryParamsFn;
+    this.aggregate = aggregate;
   }
 
   private get_collection_from_path(path: string) {
@@ -97,8 +104,18 @@ export class CollectionState<
       return;
     }
 
-    const querySnapshot = await getDocs(queryRef.withConverter(this.converter));
-    this.value = querySnapshot.docs.map(this.map_data);
+    if (this.aggregate) {
+      const querySnapshot = await getAggregateFromServer(
+        queryRef.withConverter(this.converter),
+        this.aggregate
+      );
+      this.value = querySnapshot.data();
+    } else {
+      const querySnapshot = await getDocs(
+        queryRef.withConverter(this.converter)
+      );
+      this.value = querySnapshot.docs.map(this.map_data);
+    }
 
     this.loading = false;
   }
@@ -112,22 +129,33 @@ export class CollectionState<
     if (!queryRef) {
       return;
     }
-
-    this.unsub = onSnapshot(
-      queryRef.withConverter(this.converter),
-      (querySnapshot) => {
-        if (querySnapshot.empty) {
-          callback?.([]);
-          this.value = [];
-          return;
+    if (this.aggregate) {
+      this.unsub = onSnapshot(
+        queryRef.withConverter(this.converter),
+        async (querySnapshot) => {
+          const aggregateSnapshot = await getAggregateFromServer(
+            queryRef.withConverter(this.converter),
+            this.aggregate!
+          );
+          this.value = aggregateSnapshot.data();
+          callback?.(this.value);
         }
-        const newData = querySnapshot.docs.map(this.map_data);
-        this.value = newData;
-        callback?.(this.value);
-      }
-    );
-
-    return;
+      );
+    } else {
+      this.unsub = onSnapshot(
+        queryRef.withConverter(this.converter),
+        (querySnapshot) => {
+          if (querySnapshot.empty) {
+            callback?.([]);
+            this.value = [];
+            return;
+          }
+          const newData = querySnapshot.docs.map(this.map_data);
+          this.value = newData;
+          callback?.(this.value);
+        }
+      );
+    }
   }
 
   stop(): void {

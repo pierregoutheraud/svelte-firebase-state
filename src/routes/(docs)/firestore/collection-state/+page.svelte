@@ -164,8 +164,12 @@ type AggregateData = {
 
 const users = new CollectionState<DbUser, AppUser, AggregateData>({
   firestore,
+  path: () => "users",
+
+  // If listen is true, the aggregate data will be fetched every time the collection data changes.
+  // Be careful with this option, as it can be expensive in terms of Firestore reads.
   listen: true,
-  path: () => "users_2",
+
   aggregate: {
     count: count(),
     averageAge: average("age"),
@@ -174,12 +178,7 @@ const users = new CollectionState<DbUser, AppUser, AggregateData>({
 });
   
 $inspect(users.data);
-$inspect(users.aggregateData);
-
-// Firestore doesn't support real-time updates for aggregations.
-// So this class does not implement a realtime listener 
-// as this is not efficient and should be avoided.
-// You should use users.refetch_aggregate_data() to refetch the aggregate data.`}
+$inspect(users.aggregateData);`}
 />
 
 <h2>Properties:</h2>

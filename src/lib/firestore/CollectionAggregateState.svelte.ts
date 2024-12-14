@@ -3,7 +3,8 @@ import {
   type AggregateSpec,
   getAggregateFromServer,
   collection,
-  query as firestoreQuery
+  query as firestoreQuery,
+  onSnapshot
 } from "firebase/firestore";
 import {
   FirestoreState,
@@ -13,7 +14,7 @@ import {
 
 type CollectionAggregateStateOptions = Omit<
   FirestoreStateOptions<any, any>,
-  "pathFunctionOrString" | "fromFirestore" | "toFirestore" | "listen"
+  "pathFunctionOrString" | "fromFirestore" | "toFirestore"
 > & {
   path: PathParam;
   aggregate: AggregateSpec;
@@ -29,12 +30,13 @@ export class CollectionAggregateState<
     auth,
     firestore,
     path: pathFunctionOrString,
+    listen = false,
     aggregate
   }: CollectionAggregateStateOptions) {
     super({
       auth,
       firestore,
-      listen: false,
+      listen,
       pathFunctionOrString,
       fromFirestore: (data) => data,
       toFirestore: (data) => data
@@ -85,6 +87,21 @@ export class CollectionAggregateState<
     this.loading = false;
   }
 
-  // Firestore doesn't support real-time updates for aggregations.
-  // So this class does not implement it as this is not efficient and should be avoided.
+  protected async listen_data(): Promise<void> {
+    if (this.unsub) {
+      return;
+    }
+
+    if (!this.queryRef) {
+      throw new Error("Query reference is not set");
+    }
+
+    // Firestore does not support listening to aggregate queries
+    // so we need to listen to the collection and re-fetch the data
+    this.unsub = onSnapshot(this.queryRef, () => {
+      this.fetch_data();
+    });
+
+    return;
+  }
 }

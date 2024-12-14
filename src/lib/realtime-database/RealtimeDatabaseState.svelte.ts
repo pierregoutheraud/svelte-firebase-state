@@ -14,7 +14,7 @@ export type RealtimeDatabaseStateOptions = {
 export class RealtimeDatabaseState<Data> {
   protected readonly auth?: Auth;
   protected readonly database: Database;
-  protected readonly listenAtStart: boolean;
+  protected readonly listen: boolean;
   protected readonly getUser: Promise<User | null>;
   protected readonly pathFunctionOrString?: PathParam;
   protected readonly dataState: SubscriberState<Data | null | undefined>;
@@ -36,7 +36,7 @@ export class RealtimeDatabaseState<Data> {
 
     this.auth = auth;
     this.database = database;
-    this.listenAtStart = listen ?? false;
+    this.listen = listen ?? false;
     this.getUser = get_firebase_user_promise(this.auth);
     this.pathFunctionOrString = pathFunctionOrString;
   }
@@ -57,9 +57,9 @@ export class RealtimeDatabaseState<Data> {
   async start() {
     await this.init_ref();
 
-    if (this.listenAtStart) {
+    if (this.listen) {
       // Let child classes implement their own 'listen' method
-      this.listen();
+      this.listen_data();
     } else {
       this.fetch_data();
     }
@@ -85,7 +85,7 @@ export class RealtimeDatabaseState<Data> {
     return null;
   }
 
-  protected listen() {}
+  protected listen_data() {}
 
   protected refetch(): Promise<Data | null> {
     return this.fetch_data();

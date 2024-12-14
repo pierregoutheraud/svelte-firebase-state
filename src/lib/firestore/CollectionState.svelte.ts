@@ -45,7 +45,7 @@ export class CollectionState<
     firestore,
     query: queryParamsFn,
     path: pathFunctionOrString,
-    listen: listenAtStart = false,
+    listen = false,
     fromFirestore,
     toFirestore,
     aggregate
@@ -53,7 +53,7 @@ export class CollectionState<
     super({
       auth,
       firestore,
-      listen: listenAtStart,
+      listen,
       fromFirestore,
       toFirestore,
       pathFunctionOrString
@@ -66,7 +66,8 @@ export class CollectionState<
         auth,
         firestore,
         path: pathFunctionOrString,
-        aggregate
+        aggregate,
+        listen
       });
     }
   }
@@ -131,7 +132,9 @@ export class CollectionState<
     this.loading = false;
   }
 
-  protected async listen(callback?: (d: DataApp[]) => void): Promise<void> {
+  protected async listen_data(
+    callback?: (d: DataApp[]) => void
+  ): Promise<void> {
     if (this.unsub) {
       return;
     }

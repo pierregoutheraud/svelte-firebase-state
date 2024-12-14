@@ -31,13 +31,13 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
     auth,
     database,
     path: pathFunctionOrString,
-    listen: listenAtStart = false,
+    listen = false,
     autosave = false
   }: NodeStateOptions) {
     super({
       auth,
       database,
-      listen: listenAtStart,
+      listen,
       pathFunctionOrString
     });
 
@@ -53,7 +53,7 @@ export class NodeState<Data> extends RealtimeDatabaseState<Data> {
     this.nodeRef = ref(this.database, pathStr);
   }
 
-  protected listen() {
+  protected listen_data() {
     if (!this.nodeRef) {
       throw new Error("nodeRef is not set");
     }

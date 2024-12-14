@@ -38,7 +38,7 @@ export class FirestoreState<
 > {
   protected readonly auth?: Auth;
   protected readonly firestore: Firestore;
-  protected readonly listenAtStart: boolean;
+  protected readonly listen: boolean;
   protected readonly getUser: Promise<User | null>;
   protected readonly converter: FirestoreDataConverter<DataApp, DataDb>;
   protected readonly pathFunctionOrString?: PathParam;
@@ -65,7 +65,7 @@ export class FirestoreState<
 
     this.auth = auth;
     this.firestore = firestore;
-    this.listenAtStart = listen ?? false;
+    this.listen = listen ?? false;
     this.getUser = get_firebase_user_promise(this.auth);
     this.pathFunctionOrString = pathFunctionOrString;
 
@@ -99,8 +99,8 @@ export class FirestoreState<
     this.initRefPromise = this.init_ref();
     await this.initRefPromise;
 
-    if (this.listenAtStart) {
-      this.listen();
+    if (this.listen) {
+      this.listen_data();
     } else {
       this.fetch_data();
     }
@@ -126,7 +126,7 @@ export class FirestoreState<
     return;
   }
 
-  protected async listen(): Promise<void> {}
+  protected async listen_data(): Promise<void> {}
 
   public refetch(): Promise<void> {
     return this.fetch_data();

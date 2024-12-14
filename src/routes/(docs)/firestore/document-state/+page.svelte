@@ -168,6 +168,28 @@ const user = new DocumentState<DbUser, AppUser>({
 });`}
 />
 
+<h2>Properties:</h2>
+
+<Param
+  name="data"
+  type="AppData | null | undefined"
+  description={`Reactive state that holds the collection data.
+The data is undefined when loading.
+The data is null when the document could not be found.`}
+  backgroundColor="var(--green-light-2)"
+  borderColor="var(--green-light-1)"
+  code={`$inspect(user.data);`}
+/>
+
+<Param
+  name="loading"
+  type="boolean"
+  description="Reactive state indicating if the document data is loading."
+  backgroundColor="var(--green-light-1)"
+  borderColor="var(--green-light-2)"
+  code={`$inspect(user.loading);`}
+/>
+
 <h2>Methods:</h2>
 
 <Param
@@ -182,6 +204,24 @@ const user = new DocumentState<DbUser, AppUser>({
 
 user.data.name = "Anna Smith";
 await user.save();`}
+/>
+
+<Param
+  name="refetch"
+  type="() => Promise<void>"
+  description="Refetch the document data."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await user.refetch();`}
+/>
+
+<Param
+  name="get_doc_ref"
+  type="() => Promise<DocumentReference | undefined | null>"
+  description="Get the document reference."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await user.refetch();`}
 />
 
 <h2>More examples:</h2>

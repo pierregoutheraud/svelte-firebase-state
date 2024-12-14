@@ -204,16 +204,16 @@ export class DocumentState<
     return this.unsub;
   }
 
-  public async get_doc_ref(): Promise<DocumentReference | undefined | null> {
-    await this.init_ref();
-    return this.docRef;
-  }
-
   private save_data_to_firebase() {
     if (!this.docRef) {
       return;
     }
     return setDoc(this.docRef, this.data || null, { merge: true });
+  }
+
+  public async get_doc_ref(): Promise<DocumentReference | undefined | null> {
+    await this.init_ref();
+    return this.docRef;
   }
 
   public save<K extends keyof DataApp>(

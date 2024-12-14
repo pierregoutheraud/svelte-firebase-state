@@ -22,7 +22,7 @@ interface CreateNodeStateOptions {
   listen?: boolean;
 }
 
-export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
+export class NodeListState<Data> extends RealtimeDatabaseState<Data[]> {
   private readonly queryParamsFn?: (user: User | null) => QueryConstraint[];
 
   private listRef?: DatabaseReference;
@@ -60,10 +60,10 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
   }
 
   private createArrayFromSnapshot(snapshot: DataSnapshot) {
-    const arr: T[] = [];
+    const arr: Data[] = [];
     snapshot.forEach((childSnapshot) => {
       // const childKey = childSnapshot.key;
-      const childData = childSnapshot.val() as T;
+      const childData = childSnapshot.val() as Data;
       arr.push(childData);
     });
     return arr;
@@ -87,10 +87,5 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     const snapshot = await get(this.queryRef);
     this.data = this.createArrayFromSnapshot(snapshot);
     return this.data;
-  }
-
-  stop(): void {
-    this.unsub?.();
-    this.unsub = undefined;
   }
 }

@@ -41,7 +41,26 @@ export class RealtimeDatabaseState<Data> {
     this.pathFunctionOrString = pathFunctionOrString;
   }
 
-  async get_path_string(): Promise<string | null> {
+  // Common start/stop logic can be defined here if needed
+  private async start() {
+    await this.init_ref();
+
+    if (this.listen) {
+      // Let child classes implement their own 'listen' method
+      this.listen_data();
+    } else {
+      this.fetch_data();
+    }
+  }
+
+  private stop(): void {
+    if (this.unsub) {
+      this.unsub();
+      this.unsub = undefined;
+    }
+  }
+
+  protected async get_path_string(): Promise<string | null> {
     const user = await this.getUser;
     if (typeof this.pathFunctionOrString === "function") {
       return this.pathFunctionOrString(user) ?? null;
@@ -53,41 +72,21 @@ export class RealtimeDatabaseState<Data> {
 
   protected async init_ref(): Promise<void> {}
 
-  // Common start/stop logic can be defined here if needed
-  async start() {
-    await this.init_ref();
-
-    if (this.listen) {
-      // Let child classes implement their own 'listen' method
-      this.listen_data();
-    } else {
-      this.fetch_data();
-    }
-  }
-
-  stop(): void {
-    if (this.unsub) {
-      this.unsub();
-      this.unsub = undefined;
-    }
-  }
-
-  get data(): Data | null | undefined {
-    return this.dataState.value;
-  }
-
-  set data(data: Data | null) {
-    this.dataState.value = data;
-  }
-
-  // Abstract methods for children to implement their fetching logic
   protected async fetch_data(): Promise<Data | null> {
     return null;
   }
 
-  protected listen_data() {}
+  protected listen_data(): void {}
 
-  protected refetch(): Promise<Data | null> {
+  public get data(): Data | null | undefined {
+    return this.dataState.value;
+  }
+
+  public set data(data: Data | null) {
+    this.dataState.value = data;
+  }
+
+  public refetch(): Promise<Data | null> {
     return this.fetch_data();
   }
 }

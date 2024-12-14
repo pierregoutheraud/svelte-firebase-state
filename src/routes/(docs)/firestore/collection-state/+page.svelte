@@ -243,6 +243,33 @@ The data is null when the collection could not be found.`}
   code={`await tasks.refetch_aggregate_data();`}
 />
 
+<Param
+  name="get_query_ref"
+  type="() => Promise<Query<DataApp, DataDb> | undefined>"
+  description="Get the collection query reference."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await user.refetch();`}
+/>
+
+<Param
+  name="get_collection_ref"
+  type="() => Promise<CollectionReference<DataApp, DataDb> | undefined>"
+  description="Get the collection reference."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await user.refetch();`}
+/>
+
+<Param
+  name="get_doc_ref"
+  type="() => DocumentReference | void"
+  description="Get one of the collection document reference."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+  code={`await user.refetch();`}
+/>
+
 <h2>More examples:</h2>
 
 <Example text="Listen to a collection" code={CollectionStateDemo2Code}>

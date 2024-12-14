@@ -38,7 +38,7 @@ export class CollectionState<
   private readonly aggregateState?: CollectionAggregateState<AggregateData>;
 
   private queryRef: Query<DataApp, DataDb> | undefined;
-  private collectionRef: CollectionReference | undefined;
+  private collectionRef: CollectionReference<DataApp, DataDb> | undefined;
 
   constructor({
     auth,
@@ -105,16 +105,6 @@ export class CollectionState<
     return this.queryRef;
   }
 
-  public async get_query_ref(): Promise<Query | undefined> {
-    await this.init_ref();
-    return this.queryRef;
-  }
-
-  public async get_collection_ref(): Promise<Query | undefined> {
-    await this.init_ref();
-    return this.collectionRef;
-  }
-
   private map_data(doc: QueryDocumentSnapshot<DataApp, DocumentData>): DataApp {
     return doc.data();
   }
@@ -157,14 +147,7 @@ export class CollectionState<
     return;
   }
 
-  stop(): void {
-    if (this.unsub) {
-      this.unsub();
-      this.unsub = undefined;
-    }
-  }
-
-  async add(data: DataDb): Promise<string | void> {
+  public async add(data: DataDb): Promise<string | void> {
     if (!this.collectionRef) {
       console.error("Collection reference is not set");
       return;
@@ -184,15 +167,11 @@ export class CollectionState<
     return docRef.id;
   }
 
-  get_doc_ref(id: string) {
-    if (!this.collectionRef) {
-      throw new Error("Collection reference is not set");
-    }
-
-    return doc(this.collectionRef, id);
+  public get aggregateData(): AggregateData | null | undefined {
+    return this.aggregateState?.data;
   }
 
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     if (!this.collectionRef) {
       return;
     }
@@ -201,11 +180,27 @@ export class CollectionState<
     return deleteDoc(docRef);
   }
 
-  get aggregateData(): AggregateData | null | undefined {
-    return this.aggregateState?.data;
+  public get_doc_ref(id: string) {
+    if (!this.collectionRef) {
+      throw new Error("Collection reference is not set");
+    }
+
+    return doc(this.collectionRef, id);
   }
 
-  refetch_aggregate_data(): void {
+  public refetch_aggregate_data(): void {
     this.aggregateState?.refetch();
+  }
+
+  public async get_query_ref(): Promise<Query<DataApp, DataDb> | undefined> {
+    await this.init_ref();
+    return this.queryRef;
+  }
+
+  public async get_collection_ref(): Promise<
+    CollectionReference<DataApp, DataDb> | undefined
+  > {
+    await this.init_ref();
+    return this.collectionRef;
   }
 }

@@ -145,7 +145,7 @@ export class DocumentState<
     this.loading = false;
   }
 
-  protected async listen(): Promise<void> {
+  protected async listen_data(): Promise<void> {
     if (this.unsub) {
       return;
     }

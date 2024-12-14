@@ -32,13 +32,13 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     auth,
     database,
     path: pathFunctionOrString,
-    listen: listenAtStart = false,
+    listen = false,
     query: queryParamsFn
   }: CreateNodeStateOptions) {
     super({
       auth,
       database,
-      listen: listenAtStart,
+      listen,
       pathFunctionOrString
     });
 
@@ -69,7 +69,7 @@ export class NodeListState<T> extends RealtimeDatabaseState<T[]> {
     return arr;
   }
 
-  protected listen() {
+  protected listen_data() {
     if (!this.queryRef) {
       throw new Error("queryRef is not set");
     }

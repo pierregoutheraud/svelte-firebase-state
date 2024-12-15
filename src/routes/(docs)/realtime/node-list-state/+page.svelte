@@ -81,6 +81,14 @@ The data is null when the node could not be found.`}
   borderColor="var(--light-pastel-blue-1)"
 />
 
+<Param
+  name="add"
+  type="(data: Data) => Promise<DatabaseReference>"
+  description="Add a new node to the list."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
+/>
+
 <h2>More examples:</h2>
 
 <Example

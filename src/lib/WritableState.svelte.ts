@@ -1,28 +1,21 @@
 import { tick } from "svelte";
 
-type SubscriberStateOptions<T> = {
-  defaultValue: T;
-  start?: () => void;
-  stop?: () => void;
-};
-
-export class SubscriberState<T> {
+export class WritableState<T> {
   private _value = $state<T>() as T;
   private subscribers = 0;
-  private start?: () => void;
+  private start?: () => () => void;
   private stop?: () => void;
 
-  constructor({ defaultValue, start, stop }: SubscriberStateOptions<T>) {
+  constructor(defaultValue: T, start: () => () => void) {
     this._value = defaultValue;
     this.start = start;
-    this.stop = stop;
   }
 
   public get value(): T | undefined {
     if ($effect.tracking()) {
       $effect(() => {
         if (this.subscribers === 0) {
-          this.start?.();
+          this.stop = this.start?.();
         }
         this.subscribers++;
 
@@ -31,6 +24,7 @@ export class SubscriberState<T> {
             this.subscribers--;
             if (this.subscribers === 0) {
               this.stop?.();
+              this.stop = undefined;
             }
           });
         };

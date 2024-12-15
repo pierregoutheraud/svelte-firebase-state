@@ -1,5 +1,5 @@
 import { type Auth, type User } from "firebase/auth";
-import { SubscriberState } from "../SubscriberState.svelte.js";
+import { WritableState } from "../WritableState.svelte.js";
 import { get_firebase_user } from "../utils.svelte.js";
 import type { Database, Unsubscribe } from "firebase/database";
 import type { PathParam } from "../firestore/FirestoreState.svelte.js";
@@ -17,7 +17,7 @@ export class RealtimeDatabaseState<Data> {
   protected readonly listen: boolean;
   protected readonly getUserPromise: Promise<User | null>;
   protected readonly pathFunctionOrString?: PathParam;
-  protected readonly dataState: SubscriberState<Data | null | undefined>;
+  protected readonly dataState: WritableState<Data | null | undefined>;
   protected readonly initRefPromise: Promise<void>;
 
   public loading = $state(false);
@@ -29,11 +29,13 @@ export class RealtimeDatabaseState<Data> {
     listen,
     pathFunctionOrString
   }: RealtimeDatabaseStateOptions) {
-    this.dataState = new SubscriberState<Data | undefined | null>({
-      defaultValue: undefined,
-      start: this.start.bind(this),
-      stop: this.stop.bind(this)
-    });
+    this.dataState = new WritableState<Data | undefined | null>(
+      undefined,
+      () => {
+        this.start();
+        return this.stop;
+      }
+    );
 
     this.auth = auth;
     this.database = database;
@@ -56,12 +58,12 @@ export class RealtimeDatabaseState<Data> {
     }
   }
 
-  private stop(): void {
+  private stop = () => {
     if (this.unsub) {
       this.unsub();
       this.unsub = undefined;
     }
-  }
+  };
 
   protected async get_path_string(): Promise<string | null> {
     const user = await this.getUserPromise;

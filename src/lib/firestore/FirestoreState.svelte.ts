@@ -6,7 +6,7 @@ import {
   type FirestoreDataConverter,
   type Unsubscribe
 } from "firebase/firestore";
-import { SubscriberState } from "../SubscriberState.svelte.js";
+import { WritableState } from "../WritableState.svelte.js";
 import {
   get_firebase_user,
   type FromFirestore,
@@ -42,7 +42,7 @@ export class FirestoreState<
   protected readonly getUserPromise: Promise<User | null>;
   protected readonly converter: FirestoreDataConverter<DataApp, DataDb>;
   protected readonly pathFunctionOrString?: PathParam;
-  protected readonly dataState: SubscriberState<State | null | undefined>;
+  protected readonly dataState: WritableState<State | null | undefined>;
 
   protected unsub: Unsubscribe | undefined;
   protected initRefPromise: Promise<unknown> | undefined;
@@ -57,11 +57,13 @@ export class FirestoreState<
     toFirestore,
     pathFunctionOrString
   }: FirestoreStateOptions<DataDb, DataApp>) {
-    this.dataState = new SubscriberState<State | undefined | null>({
-      defaultValue: undefined,
-      start: this.start.bind(this),
-      stop: this.stop.bind(this)
-    });
+    this.dataState = new WritableState<State | undefined | null>(
+      undefined,
+      () => {
+        this.start();
+        return this.stop;
+      }
+    );
 
     this.auth = auth;
     this.firestore = firestore;
@@ -106,12 +108,12 @@ export class FirestoreState<
     }
   }
 
-  stop(): void {
+  private stop = () => {
     if (this.unsub) {
       this.unsub();
       this.unsub = undefined;
     }
-  }
+  };
 
   get data(): State | null | undefined {
     return this.dataState.value;

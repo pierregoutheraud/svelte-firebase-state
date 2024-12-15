@@ -76,14 +76,6 @@ The data is null when the node could not be found.`}
 <h2>Methods:</h2>
 
 <Param
-  name="refetch"
-  type="() => Promise<Data>"
-  description="Re-fetch the data."
-  backgroundColor="var(--light-pastel-blue-2)"
-  borderColor="var(--light-pastel-blue-1)"
-/>
-
-<Param
   name="save"
   type="(key?: K, update?: DataApp[K] | ((prevValue: DataApp[K]) => DataApp[K])) => Promise<void>"
   description="Save changes to the document."
@@ -95,6 +87,14 @@ The data is null when the node could not be found.`}
 
 user.data.name = "Anna Smith";
 await user.save();`}
+/>
+
+<Param
+  name="refetch"
+  type="() => Promise<Data>"
+  description="Re-fetch the data."
+  backgroundColor="var(--light-pastel-blue-2)"
+  borderColor="var(--light-pastel-blue-1)"
 />
 
 <h2>More examples:</h2>

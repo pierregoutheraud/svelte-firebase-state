@@ -221,7 +221,7 @@ await user.save();`}
   description="Get the document reference."
   backgroundColor="var(--light-pastel-blue-2)"
   borderColor="var(--light-pastel-blue-1)"
-  code={`await user.refetch();`}
+  code={`await user.get_doc_ref();`}
 />
 
 <h2>More examples:</h2>

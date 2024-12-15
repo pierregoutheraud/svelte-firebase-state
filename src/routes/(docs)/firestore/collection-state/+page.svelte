@@ -249,7 +249,7 @@ The data is null when the collection could not be found.`}
   description="Get the collection query reference."
   backgroundColor="var(--light-pastel-blue-2)"
   borderColor="var(--light-pastel-blue-1)"
-  code={`await user.refetch();`}
+  code={`await user.get_query_ref();`}
 />
 
 <Param
@@ -258,16 +258,16 @@ The data is null when the collection could not be found.`}
   description="Get the collection reference."
   backgroundColor="var(--light-pastel-blue-2)"
   borderColor="var(--light-pastel-blue-1)"
-  code={`await user.refetch();`}
+  code={`await user.get_collection_ref();`}
 />
 
 <Param
   name="get_doc_ref"
-  type="() => DocumentReference | void"
+  type="(id: string) => DocumentReference | void"
   description="Get one of the collection document reference."
   backgroundColor="var(--light-pastel-blue-2)"
   borderColor="var(--light-pastel-blue-1)"
-  code={`await user.refetch();`}
+  code={`user.get_doc_ref(id);`}
 />
 
 <h2>More examples:</h2>

@@ -7,19 +7,11 @@ const file = fileURLToPath(new URL("package.json", import.meta.url));
 const json = readFileSync(file, "utf8");
 const pkg = JSON.parse(json);
 
-export default defineConfig(({ mode }) => {
-  const isLibrary = mode === "library";
-
+export default defineConfig(() => {
   return {
     plugins: [sveltekit()],
     test: {
       include: ["src/**/*.{test,spec}.{js,ts}"]
-    },
-    build: {
-      rollupOptions: {
-        // Only apply externals for library build
-        external: isLibrary ? ["svelte", "firebase"] : []
-      }
     },
     define: {
       PKG: pkg

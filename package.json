@@ -19,7 +19,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite dev",
-    "lib:build": "vite build --mode library && pnpm run package",
+    "build:lib": "vite build && pnpm run package",
     "build": "vite build --mode production",
     "preview": "vite preview",
     "package": "svelte-kit sync && svelte-package && publint",

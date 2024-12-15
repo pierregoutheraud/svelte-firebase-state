@@ -77,7 +77,9 @@ export class CollectionState<
       string,
       ...string[]
     ];
-    return collection(this.firestore, ...pathArray);
+    return collection(this.firestore, ...pathArray).withConverter(
+      this.converter
+    );
   }
 
   protected async init_ref(): Promise<Query | undefined> {
@@ -85,9 +87,9 @@ export class CollectionState<
       return this.queryRef;
     }
 
-    const user = await this.getUser;
+    const user = await this.getUserPromise;
 
-    let pathStr = this.get_path_string(user);
+    const pathStr = this.get_path_string(user);
 
     if (!pathStr) {
       throw new Error("Path string is not set");
@@ -97,10 +99,7 @@ export class CollectionState<
 
     const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
 
-    this.queryRef = firestoreQuery(
-      this.collectionRef,
-      ...queryParams
-    ).withConverter(this.converter);
+    this.queryRef = firestoreQuery(this.collectionRef, ...queryParams);
 
     return this.queryRef;
   }
@@ -193,14 +192,14 @@ export class CollectionState<
   }
 
   public async get_query_ref(): Promise<Query<DataApp, DataDb> | undefined> {
-    await this.init_ref();
+    await this.initRefPromise;
     return this.queryRef;
   }
 
   public async get_collection_ref(): Promise<
     CollectionReference<DataApp, DataDb> | undefined
   > {
-    await this.init_ref();
+    await this.initRefPromise;
     return this.collectionRef;
   }
 }

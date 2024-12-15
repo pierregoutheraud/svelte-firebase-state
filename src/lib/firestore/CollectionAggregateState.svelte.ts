@@ -58,7 +58,7 @@ export class CollectionAggregateState<
       return this.queryRef;
     }
 
-    const user = await this.getUser;
+    const user = await this.getUserPromise;
     const pathStr = this.get_path_string(user);
 
     if (!pathStr) {

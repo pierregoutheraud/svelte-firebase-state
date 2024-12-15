@@ -19,6 +19,7 @@
   import { NodeListState } from "$lib/realtime-database/NodeListState.svelte.js";
   import { limitToLast, orderByChild, push, ref, set } from "firebase/database";
   import { database } from "@/www-lib/firebase.js";
+  import { onMount } from "svelte";
 
   interface Message {
     username: string;
@@ -36,6 +37,14 @@
     listen: true
   });
 
+  onMount(() => {
+    // messages.add({
+    //   username: "username1",
+    //   text: "text1",
+    //   timestamp: 1234567890
+    // });
+  });
+
   async function handleSend() {
     if (!username.length || !text.length) {
       window.alert("Please enter a username and a message.");
@@ -48,6 +57,21 @@
       timestamp: Date.now()
     });
 
+    console.log("+page | key", newMessageRef?.key);
+
+    // Or you can also use your custom code:
+
+    // const listRef = await messages.get_list_ref();
+    // if (!listRef) {
+    //   return;
+    // }
+    // const newMessageRef = push(listRef);
+    // set(newMessageRef, {
+    //   username,
+    //   text,
+    //   timestamp: Date.now()
+    // });
+
     text = "";
   }
 </script>
@@ -59,7 +83,7 @@
     <button onclick={handleSend}>Send message</button>
   </div>
 
-  {#if messages.data}
+  {#if messages.data?.length}
     <div class="messages">
       {#each messages.data as message}
         <div class="message">

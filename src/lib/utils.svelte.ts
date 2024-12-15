@@ -16,9 +16,7 @@ export function effect_deps(fn: () => any, fnDeps: () => unknown[]) {
   });
 }
 
-export async function get_firebase_user_promise(
-  auth?: Auth
-): Promise<User | null> {
+export async function get_firebase_user(auth?: Auth): Promise<User | null> {
   if (!auth) {
     return null;
   }
@@ -27,12 +25,13 @@ export async function get_firebase_user_promise(
     const unsubscribe = onAuthStateChanged(
       auth,
       (user) => {
-        unsubscribe?.(); // Stop listening after first response
+        // Stop listening after first response
+        unsubscribe?.();
+
         if (user) {
           resolve(user);
         } else {
           resolve(null);
-          // reject(new Error("No user is signed in"));
         }
       },
       reject

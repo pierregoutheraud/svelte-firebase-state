@@ -73,7 +73,7 @@ export class DocumentState<
       return this.docRef;
     }
 
-    const user = await this.getUser;
+    const user = await this.getUserPromise;
 
     if (this.pathFunctionOrString) {
       const pathStr = this.get_path_string(user);
@@ -212,7 +212,7 @@ export class DocumentState<
   }
 
   public async get_doc_ref(): Promise<DocumentReference | undefined | null> {
-    await this.init_ref();
+    await this.initRefPromise;
     return this.docRef;
   }
 

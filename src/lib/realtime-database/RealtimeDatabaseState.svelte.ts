@@ -1,6 +1,6 @@
 import { type Auth, type User } from "firebase/auth";
 import { SubscriberState } from "../SubscriberState.svelte.js";
-import { get_firebase_user_promise } from "../utils.svelte.js";
+import { get_firebase_user } from "../utils.svelte.js";
 import type { Database, Unsubscribe } from "firebase/database";
 import type { PathParam } from "../firestore/FirestoreState.svelte.js";
 
@@ -15,9 +15,10 @@ export class RealtimeDatabaseState<Data> {
   protected readonly auth?: Auth;
   protected readonly database: Database;
   protected readonly listen: boolean;
-  protected readonly getUser: Promise<User | null>;
+  protected readonly getUserPromise: Promise<User | null>;
   protected readonly pathFunctionOrString?: PathParam;
   protected readonly dataState: SubscriberState<Data | null | undefined>;
+  protected readonly initRefPromise: Promise<void>;
 
   public loading = $state(false);
   protected unsub?: Unsubscribe | undefined;
@@ -37,13 +38,15 @@ export class RealtimeDatabaseState<Data> {
     this.auth = auth;
     this.database = database;
     this.listen = listen ?? false;
-    this.getUser = get_firebase_user_promise(this.auth);
     this.pathFunctionOrString = pathFunctionOrString;
+
+    this.getUserPromise = get_firebase_user(this.auth);
+    this.initRefPromise = this.init_ref();
   }
 
   // Common start/stop logic can be defined here if needed
   private async start() {
-    await this.init_ref();
+    await this.initRefPromise;
 
     if (this.listen) {
       // Let child classes implement their own 'listen' method
@@ -61,7 +64,7 @@ export class RealtimeDatabaseState<Data> {
   }
 
   protected async get_path_string(): Promise<string | null> {
-    const user = await this.getUser;
+    const user = await this.getUserPromise;
     if (typeof this.pathFunctionOrString === "function") {
       return this.pathFunctionOrString(user) ?? null;
     } else if (typeof this.pathFunctionOrString === "string") {

@@ -8,7 +8,9 @@ import {
   query,
   type Query,
   get,
-  DataSnapshot
+  DataSnapshot,
+  push,
+  set
 } from "firebase/database";
 import { RealtimeDatabaseState } from "./RealtimeDatabaseState.svelte.js";
 
@@ -53,7 +55,7 @@ export class NodeListState<Data> extends RealtimeDatabaseState<Data[]> {
 
     this.listRef = ref(this.database, pathStr);
 
-    const user = await this.getUser;
+    const user = await this.getUserPromise;
     const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
 
     this.queryRef = query(this.listRef, ...queryParams);
@@ -87,5 +89,23 @@ export class NodeListState<Data> extends RealtimeDatabaseState<Data[]> {
     const snapshot = await get(this.queryRef);
     this.data = this.createArrayFromSnapshot(snapshot);
     return this.data;
+  }
+
+  public async get_list_ref() {
+    await this.initRefPromise;
+    return this.listRef;
+  }
+
+  public async add(data: Data) {
+    await this.initRefPromise;
+
+    if (!this.listRef) {
+      throw new Error("listRef is not set");
+    }
+
+    const newMessageRef = push(this.listRef);
+    set(newMessageRef, data);
+
+    return newMessageRef;
   }
 }

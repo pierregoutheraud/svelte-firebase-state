@@ -8,7 +8,7 @@ import {
 } from "firebase/firestore";
 import { SubscriberState } from "../SubscriberState.svelte.js";
 import {
-  get_firebase_user_promise,
+  get_firebase_user,
   type FromFirestore,
   type ToFirestore
 } from "../utils.svelte.js";
@@ -39,7 +39,7 @@ export class FirestoreState<
   protected readonly auth?: Auth;
   protected readonly firestore: Firestore;
   protected readonly listen: boolean;
-  protected readonly getUser: Promise<User | null>;
+  protected readonly getUserPromise: Promise<User | null>;
   protected readonly converter: FirestoreDataConverter<DataApp, DataDb>;
   protected readonly pathFunctionOrString?: PathParam;
   protected readonly dataState: SubscriberState<State | null | undefined>;
@@ -66,7 +66,6 @@ export class FirestoreState<
     this.auth = auth;
     this.firestore = firestore;
     this.listen = listen ?? false;
-    this.getUser = get_firebase_user_promise(this.auth);
     this.pathFunctionOrString = pathFunctionOrString;
 
     const defaultFromFirestore: FromFirestore<DataApp, DataDb> = (snap) => ({
@@ -83,6 +82,9 @@ export class FirestoreState<
       toFirestore: toFirestore ?? defaultToFirestore,
       fromFirestore: fromFirestore ?? defaultFromFirestore
     };
+
+    this.getUserPromise = get_firebase_user(this.auth);
+    this.initRefPromise = this.init_ref();
   }
 
   get_path_string(user: User | null): string | null {
@@ -95,8 +97,6 @@ export class FirestoreState<
   }
 
   async start(): Promise<void> {
-    // Wait for queryRef/docRef to be initialized
-    this.initRefPromise = this.init_ref();
     await this.initRefPromise;
 
     if (this.listen) {

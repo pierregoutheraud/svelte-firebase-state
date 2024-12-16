@@ -19,7 +19,8 @@
         '"$lib/firestore/CollectionState.svelte.js"',
         '"$lib/firestore/DocumentState.svelte.js"',
         '"$lib/realtime-database/NodeState.svelte.js"',
-        '"$lib/realtime-database/NodeListState.svelte.js"'
+        '"$lib/realtime-database/NodeListState.svelte.js"',
+        '"@/lib/auth/CurrentUserState.svelte.js"'
       ],
       to: '"svelte-firebase-state"'
     },

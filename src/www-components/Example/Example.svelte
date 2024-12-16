@@ -6,7 +6,7 @@
   type Props = {
     text?: string;
     code: string;
-    children: Snippet;
+    children?: Snippet;
     demoPosition?: "top" | "bottom";
   };
 
@@ -14,10 +14,12 @@
 </script>
 
 {#snippet demo()}
-  <div class="demo">
-    <Tag backgroundColor="var(--teal)">demo</Tag>
-    {@render children()}
-  </div>
+  {#if children}
+    <div class="demo">
+      <Tag backgroundColor="var(--teal)">demo</Tag>
+      {@render children()}
+    </div>
+  {/if}
 {/snippet}
 
 <div class="container">

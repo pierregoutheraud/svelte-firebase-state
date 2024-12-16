@@ -28,6 +28,14 @@ export class CurrentUserState {
     );
   }
 
+  private start() {
+    this.listen_user();
+  }
+
+  private stop = () => {
+    this.unsub?.();
+  };
+
   private listen_user() {
     this.unsub = onAuthStateChanged(this.auth, (currentUser) => {
       if (currentUser) {
@@ -38,14 +46,6 @@ export class CurrentUserState {
       this.loading = false;
     });
   }
-
-  private start() {
-    this.listen_user();
-  }
-
-  private stop = () => {
-    this.unsub?.();
-  };
 
   public get data() {
     return this.userState.value;

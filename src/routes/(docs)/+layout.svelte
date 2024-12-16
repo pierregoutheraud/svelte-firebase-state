@@ -76,6 +76,12 @@
         >
           {isDesktop.current ? "Realtime " : ""}Database
         </NavItem>
+        <NavItem
+          href="/auth/current-user-state"
+          active={$page.url.pathname.includes("/auth")}
+        >
+          Auth
+        </NavItem>
       </Nav>
 
       <div class="children">

@@ -190,7 +190,7 @@
     flex-direction: column;
     gap: 20px;
     padding: 20px 0 500px;
-    max-width: 1000px;
+    width: 900px;
     position: relative;
   }
 
@@ -236,6 +236,7 @@
     }
 
     .children {
+      max-width: auto;
       width: 100%;
     }
   }

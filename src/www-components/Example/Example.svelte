@@ -17,7 +17,9 @@
   {#if children}
     <div class="demo">
       <Tag backgroundColor="var(--teal)">demo</Tag>
-      {@render children()}
+      <div class="demo-content">
+        {@render children()}
+      </div>
     </div>
   {/if}
 {/snippet}
@@ -50,14 +52,13 @@
     position: relative;
     border: 2px solid rgba(0, 0, 0, 0.02);
     background: rgba(0, 0, 0, 0.03);
-
-    /* border: 2px solid var(--cyan-light-2); */
-    /* background: var(--cyan-light-1); */
-
-    padding: 40px;
     display: flex;
     flex-direction: column;
     gap: 20px;
+  }
+  .demo-content {
+    overflow-x: auto;
+    padding: 30px;
   }
 
   .content.demoTop .demo {

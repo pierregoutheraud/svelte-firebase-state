@@ -34,8 +34,8 @@
   .nav-item.active {
     opacity: 1;
     font-weight: 600;
-    border-bottom: 2px solid var(--red-1);
-    color: var(--red-1);
+    border-bottom: 2px solid var(--active-color);
+    color: var(--active-color);
   }
 
   @media screen and (max-width: 767px) {
@@ -44,7 +44,7 @@
       padding: 0;
     }
     .nav-item.active {
-      border-bottom: 1px solid var(--red-1);
+      border-bottom: 1px solid var(--active-color);
     }
   }
 </style>

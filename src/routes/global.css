@@ -117,4 +117,5 @@ h4 {
 p,
 span {
   font-size: 16px;
+  word-break: break-word;
 }

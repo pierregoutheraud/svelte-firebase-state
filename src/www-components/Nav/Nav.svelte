@@ -3,12 +3,13 @@
 
   interface Props {
     children: Snippet;
+    activeColor?: string;
   }
 
-  let { children }: Props = $props();
+  let { children, activeColor = "var(--red-1)" }: Props = $props();
 </script>
 
-<div class="Nav">
+<div class="Nav" style:--active-color={activeColor}>
   {@render children()}
 </div>
 
@@ -21,7 +22,9 @@
 
   @media screen and (max-width: 767px) {
     .Nav {
-      gap: 20px;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
   }
 </style>

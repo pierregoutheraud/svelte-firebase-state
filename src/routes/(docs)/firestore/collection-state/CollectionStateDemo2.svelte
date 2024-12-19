@@ -57,7 +57,7 @@
             alt="user"
           />
           <p>{user.name}</p>
-          <button onclick={() => handleRemove(user)}>Remove user</button>
+          <button onclick={() => handleRemove(user)}>Remove</button>
         </div>
       {/each}
     </div>
@@ -79,7 +79,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    width: 300px;
+    max-width: 300px;
   }
   .user button {
     text-align: center;
@@ -105,10 +105,12 @@
     font-size: 16px;
     background: black;
     color: white;
+    flex-shrink: 0;
   }
 
   .form {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
   }
 </style>

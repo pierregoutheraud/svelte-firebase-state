@@ -58,44 +58,35 @@
     </a>
   </header>
 
-  {#if isDesktop.current}
-    <section class="content">
-      <Nav>
-        <NavItem href={"/"} active={$page.url.pathname === "/"}>
-          What is it?
-        </NavItem>
-        <NavItem
-          href="/firestore/collection-state"
-          active={$page.url.pathname.includes("/firestore")}
-        >
-          Firestore
-        </NavItem>
-        <NavItem
-          href="/realtime/node-list-state"
-          active={$page.url.pathname.includes("/realtime")}
-        >
-          {isDesktop.current ? "Realtime " : ""}Database
-        </NavItem>
-        <NavItem
-          href="/auth/current-user-state"
-          active={$page.url.pathname.includes("/auth")}
-        >
-          Auth
-        </NavItem>
-      </Nav>
+  <section class="content">
+    <Nav>
+      <NavItem href={"/"} active={$page.url.pathname === "/"}>
+        {isDesktop.current ? "What is it? " : "What?"}
+      </NavItem>
+      <NavItem
+        href="/firestore/collection-state"
+        active={$page.url.pathname.includes("/firestore")}
+      >
+        Firestore
+      </NavItem>
+      <NavItem
+        href="/realtime/node-list-state"
+        active={$page.url.pathname.includes("/realtime")}
+      >
+        {isDesktop.current ? "Realtime " : ""}Database
+      </NavItem>
+      <NavItem
+        href="/auth/current-user-state"
+        active={$page.url.pathname.includes("/auth")}
+      >
+        Auth
+      </NavItem>
+    </Nav>
 
-      <div class="children">
-        {@render children()}
-      </div>
-    </section>
-  {:else}
-    <section class="content">
-      <p>
-        Mobile version in progress. Please visit on desktop for full
-        documentation. Thank you!
-      </p>
-    </section>
-  {/if}
+    <div class="children">
+      {@render children()}
+    </div>
+  </section>
 </main>
 
 <style>
@@ -199,14 +190,11 @@
     flex-direction: column;
     gap: 20px;
     padding: 20px 0 500px;
-    width: 1000px;
+    max-width: 1000px;
     position: relative;
   }
 
   @media screen and (max-width: 767px) {
-    main {
-      height: 100%;
-    }
     header {
       flex: 1;
       align-items: center;
@@ -247,8 +235,8 @@
       padding: 20px;
     }
 
-    .content p {
-      font-weight: 600;
+    .children {
+      width: 100%;
     }
   }
 </style>

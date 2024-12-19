@@ -104,4 +104,10 @@ $inspect(tasks.data);`}
   .paragraph p span {
     font-weight: 700;
   }
+
+  @media screen and (max-width: 767px) {
+    .content {
+      margin-top: 0px;
+    }
+  }
 </style>

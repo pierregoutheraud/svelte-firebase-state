@@ -9,7 +9,7 @@
 </script>
 
 <div class="container">
-  <Nav>
+  <Nav activeColor="var(--red-1)" size="small">
     <NavItem
       href="/auth/current-user-state"
       active={$page.url.pathname === "/auth/current-user-state"}

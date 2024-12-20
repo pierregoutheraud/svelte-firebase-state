@@ -9,7 +9,7 @@
 </script>
 
 <div class="container">
-  <Nav>
+  <Nav activeColor="var(--red-1)" size="small">
     <NavItem
       href="/realtime/node-list-state"
       active={$page.url.pathname === "/realtime/node-list-state"}

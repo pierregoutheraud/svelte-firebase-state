@@ -4,12 +4,17 @@
   interface Props {
     children: Snippet;
     activeColor?: string;
+    size?: "small" | "default";
   }
 
-  let { children, activeColor = "var(--red-1)" }: Props = $props();
+  let {
+    children,
+    activeColor = "var(--red-1)",
+    size = "default"
+  }: Props = $props();
 </script>
 
-<div class="Nav" style:--active-color={activeColor}>
+<div class={`Nav nav-size-${size}`} style:--active-color={activeColor}>
   {@render children()}
 </div>
 
@@ -17,7 +22,7 @@
   .Nav {
     align-self: center;
     display: flex;
-    gap: 20px;
+    gap: 26px;
   }
 
   @media screen and (max-width: 767px) {

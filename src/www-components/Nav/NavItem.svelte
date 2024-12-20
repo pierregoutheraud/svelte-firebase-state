@@ -26,7 +26,7 @@
     color: var(--black);
     text-decoration: none;
     font-size: 20px;
-    padding: 8px 6px;
+    padding: 8px 4px;
     opacity: 0.8;
     text-align: center;
     cursor: pointer;
@@ -36,6 +36,11 @@
     font-weight: 600;
     border-bottom: 2px solid var(--active-color);
     color: var(--active-color);
+  }
+
+  :global(.Nav.nav-size-small) .nav-item {
+    font-size: 18px;
+    padding: 4px 0;
   }
 
   @media screen and (max-width: 767px) {

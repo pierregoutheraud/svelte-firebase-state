@@ -9,7 +9,7 @@
 </script>
 
 <div class="container">
-  <Nav>
+  <Nav activeColor="var(--red-1)" size="small">
     <NavItem
       href="/firestore/collection-state"
       active={$page.url.pathname === "/firestore/collection-state"}

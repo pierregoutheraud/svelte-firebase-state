@@ -10,7 +10,8 @@ import {
   type DocumentData,
   type QueryDocumentSnapshot,
   type CollectionReference,
-  type AggregateSpec
+  type AggregateSpec,
+  setDoc
 } from "firebase/firestore";
 import {
   FirestoreState,
@@ -31,7 +32,7 @@ type CollectionStateOptions<
 
 export class CollectionState<
   DataDb extends DocumentData,
-  DataApp extends DataDb & { id: string } = DataDb & { id: string },
+  DataApp extends DocumentData = DataDb & { id: string },
   AggregateData = any
 > extends FirestoreState<DataDb, DataApp, DataApp[]> {
   private readonly queryParamsFn?: QueryParamsFn;
@@ -148,23 +149,19 @@ export class CollectionState<
     return;
   }
 
-  public async add(data: DataDb): Promise<string | void> {
+  public async add(data: DataDb | DataApp): Promise<string | void> {
     if (!this.collectionRef) {
       console.error("Collection reference is not set");
       return;
     }
 
-    const currentData = this.data || [];
-    const randomId = Math.random().toString(36).substring(7);
-    const newData = { id: randomId, ...data } as DataApp;
-    this.data = [...currentData, newData];
-    const docRef = await addDoc(this.collectionRef, data as DocumentData);
-    this.data = this.data.map((d) => {
-      if (d.id === randomId) {
-        return { id: docRef.id, ...data } as DataApp;
-      }
-      return d;
-    });
+    const docRef = doc(this.collectionRef);
+
+    // TODO: Here we have the id from docRef, we could do optimistic update
+    // this.data = [...currentData, data];
+
+    await setDoc(docRef, data as DataApp);
+
     return docRef.id;
   }
 

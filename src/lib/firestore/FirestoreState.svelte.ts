@@ -34,7 +34,7 @@ export type FirestoreStateOptions<
 
 export class FirestoreState<
   DataDb extends DocumentData,
-  DataApp extends DataDb & { id: string },
+  DataApp extends DocumentData,
   State
 > {
   protected readonly auth?: Auth;

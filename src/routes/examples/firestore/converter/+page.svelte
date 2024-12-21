@@ -2,27 +2,49 @@
   import { CollectionState } from "$lib/firestore/CollectionState.svelte.js";
   import { genericIdConverter } from "@/lib/utils.svelte.js";
   import { firestore } from "@/www-lib/firebase.js";
+  import type {
+    FirestoreDataConverter,
+    QueryDocumentSnapshot,
+    WithFieldValue
+  } from "firebase/firestore";
 
-  interface User {
+  type DbUser = {
     name: string;
-    age: number;
-  }
+  };
 
-  const users = new CollectionState<User>({
+  type AppUser = {
+    id: string;
+    username: string;
+  };
+
+  const converter: FirestoreDataConverter<AppUser, DbUser> = {
+    toFirestore: (data: WithFieldValue<AppUser>): WithFieldValue<DbUser> =>
+      data as unknown as DbUser,
+    fromFirestore: (snap: QueryDocumentSnapshot<DbUser, AppUser>) => {
+      const { name, ...firestoreData } = snap.data();
+      return {
+        ...firestoreData,
+        id: snap.id,
+        username: name
+      };
+    }
+  };
+
+  const users = new CollectionState<DbUser, AppUser>({
     firestore,
     listen: true,
     path: () => "users",
-    converter: genericIdConverter<User, User & { id: string }>()
+    converter
   });
 
-  $inspect(users.data);
+  $inspect("--->", users.data);
 </script>
 
 <div class="users">
   {#if users.data}
     {#each users.data as user}
       <div class="user">
-        <p>{user.name}</p>
+        <p>{user.username}</p>
       </div>
     {/each}
   {/if}

@@ -48,7 +48,8 @@ export class CollectionState<
     listen = false,
     fromFirestore,
     toFirestore,
-    aggregate
+    aggregate,
+    converter
   }: CollectionStateOptions<DataDb, DataApp>) {
     super({
       auth,
@@ -56,7 +57,8 @@ export class CollectionState<
       listen,
       fromFirestore,
       toFirestore,
-      pathFunctionOrString
+      pathFunctionOrString,
+      converter
     });
 
     this.queryParamsFn = queryParamsFn;

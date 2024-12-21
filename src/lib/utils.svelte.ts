@@ -46,7 +46,6 @@ export const genericIdConverter = <
   toFirestore: (data: WithFieldValue<DataApp>): WithFieldValue<DataDb> =>
     data as DataDb,
   fromFirestore: (snap: QueryDocumentSnapshot<DataApp, DataDb>): DataApp => {
-    console.log("from firestore", snap);
     return {
       id: snap.id,
       ...snap.data()

@@ -29,6 +29,7 @@ export type FirestoreStateOptions<
   fromFirestore?: FromFirestore<DataApp, DataDb>;
   toFirestore?: ToFirestore<DataApp, DataDb>;
   pathFunctionOrString?: PathParam;
+  converter?: FirestoreDataConverter<DataApp, DataDb>;
 };
 
 export class FirestoreState<
@@ -55,7 +56,8 @@ export class FirestoreState<
     listen,
     fromFirestore,
     toFirestore,
-    pathFunctionOrString
+    pathFunctionOrString,
+    converter
   }: FirestoreStateOptions<DataDb, DataApp>) {
     this.dataState = new WritableState<State | undefined | null>(
       undefined,
@@ -80,7 +82,7 @@ export class FirestoreState<
       return rest as unknown as DataDb;
     };
 
-    this.converter = {
+    this.converter = converter ?? {
       toFirestore: toFirestore ?? defaultToFirestore,
       fromFirestore: fromFirestore ?? defaultFromFirestore
     };

@@ -53,7 +53,8 @@ export class DocumentState<
     query: queryParams,
     listen = false,
     fromFirestore,
-    toFirestore
+    toFirestore,
+    converter
   }: DocumentStateOptions<DataDb, DataApp>) {
     super({
       auth,
@@ -61,7 +62,8 @@ export class DocumentState<
       listen,
       fromFirestore,
       toFirestore,
-      pathFunctionOrString: pathFunctionOrString ?? undefined
+      pathFunctionOrString: pathFunctionOrString ?? undefined,
+      converter
     });
 
     this.collectionPathFunctionOrString = collectionPathFunctionOrString;

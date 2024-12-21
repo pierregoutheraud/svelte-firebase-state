@@ -70,7 +70,7 @@ export class DocumentState<
     this.queryParams = queryParams;
   }
 
-  protected async init_ref(): Promise<DocumentReference | undefined | null> {
+  protected async init(): Promise<DocumentReference | undefined | null> {
     if (this.docRef) {
       return this.docRef;
     }
@@ -214,7 +214,7 @@ export class DocumentState<
   }
 
   public async get_doc_ref(): Promise<DocumentReference | undefined | null> {
-    await this.initRefPromise;
+    await this.initPromise;
     return this.docRef;
   }
 

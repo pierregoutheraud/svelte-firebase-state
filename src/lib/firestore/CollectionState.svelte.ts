@@ -3,7 +3,6 @@ import {
   getDocs,
   query as firestoreQuery,
   onSnapshot,
-  addDoc,
   deleteDoc,
   doc,
   type Query,
@@ -30,12 +29,18 @@ type CollectionStateOptions<
   aggregate?: AggregateSpec;
 };
 
+enum COLLECTION_STATE_ERRORS {
+  NO_COLLECTION_REF = "Collection reference is not set",
+  NO_QUERY_REF = "Query reference is not set",
+  NO_PATH_STRING = "Path string is not set"
+}
+
 export class CollectionState<
   DataDb extends DocumentData,
   DataApp extends DocumentData = DataDb & { id: string },
   AggregateData = any
 > extends FirestoreState<DataDb, DataApp, DataApp[]> {
-  private readonly queryParamsFn?: QueryParamsFn;
+  private readonly queryFunction?: QueryParamsFn;
   private readonly aggregateState?: CollectionAggregateState<AggregateData>;
 
   private queryRef: Query<DataApp, DataDb> | undefined;
@@ -44,7 +49,7 @@ export class CollectionState<
   constructor({
     auth,
     firestore,
-    query: queryParamsFn,
+    query: queryFunction,
     path: pathFunctionOrString,
     listen = false,
     fromFirestore,
@@ -62,7 +67,7 @@ export class CollectionState<
       converter
     });
 
-    this.queryParamsFn = queryParamsFn;
+    this.queryFunction = queryFunction;
 
     if (aggregate) {
       this.aggregateState = new CollectionAggregateState<AggregateData>({
@@ -85,26 +90,27 @@ export class CollectionState<
     );
   }
 
-  protected async init_ref(): Promise<Query | undefined> {
-    if (this.queryRef) {
-      return this.queryRef;
-    }
-
+  protected async init() {
     const user = await this.getUserPromise;
 
     const pathStr = this.get_path_string(user);
 
     if (!pathStr) {
-      throw new Error("Path string is not set");
+      throw new Error(COLLECTION_STATE_ERRORS.NO_PATH_STRING);
     }
 
     this.collectionRef = this.get_collection_from_path(pathStr);
+  }
 
-    const queryParams = this.queryParamsFn ? this.queryParamsFn(user) : [];
+  // Set query reference with query function
+  private async setup_query_ref(): Promise<typeof this.queryRef | undefined> {
+    if (!this.collectionRef) {
+      throw new Error(COLLECTION_STATE_ERRORS.NO_COLLECTION_REF);
+    }
 
-    this.queryRef = firestoreQuery(this.collectionRef, ...queryParams);
-
-    return this.queryRef;
+    const user = await this.getUserPromise;
+    const queryParams = this.queryFunction ? this.queryFunction(user) : [];
+    return firestoreQuery(this.collectionRef, ...queryParams);
   }
 
   private map_data(doc: QueryDocumentSnapshot<DataApp, DocumentData>): DataApp {
@@ -114,11 +120,13 @@ export class CollectionState<
   protected async fetch_data(): Promise<void> {
     this.loading = true;
 
+    this.queryRef = await this.setup_query_ref();
     if (!this.queryRef) {
-      throw new Error("Query reference is not set");
+      throw new Error(COLLECTION_STATE_ERRORS.NO_QUERY_REF);
     }
 
     const querySnapshot = await getDocs(this.queryRef);
+
     this.data = querySnapshot.docs.map(this.map_data);
 
     this.loading = false;
@@ -131,8 +139,9 @@ export class CollectionState<
       return;
     }
 
+    this.queryRef = await this.setup_query_ref();
     if (!this.queryRef) {
-      throw new Error("Query reference is not set");
+      throw new Error(COLLECTION_STATE_ERRORS.NO_QUERY_REF);
     }
 
     this.unsub = onSnapshot(this.queryRef, (querySnapshot) => {
@@ -180,7 +189,7 @@ export class CollectionState<
 
   public get_doc_ref(id: string) {
     if (!this.collectionRef) {
-      throw new Error("Collection reference is not set");
+      throw new Error(COLLECTION_STATE_ERRORS.NO_COLLECTION_REF);
     }
 
     return doc(this.collectionRef, id);
@@ -191,14 +200,15 @@ export class CollectionState<
   }
 
   public async get_query_ref(): Promise<Query<DataApp, DataDb> | undefined> {
-    await this.initRefPromise;
+    await this.initPromise;
+    this.queryRef = await this.setup_query_ref();
     return this.queryRef;
   }
 
   public async get_collection_ref(): Promise<
     CollectionReference<DataApp, DataDb> | undefined
   > {
-    await this.initRefPromise;
+    await this.initPromise;
     return this.collectionRef;
   }
 }

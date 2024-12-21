@@ -53,11 +53,7 @@ export class CollectionAggregateState<
     return collection(this.firestore, ...pathArray);
   }
 
-  protected async init_ref(): Promise<Query | undefined> {
-    if (this.queryRef) {
-      return this.queryRef;
-    }
-
+  protected async init() {
     const user = await this.getUserPromise;
     const pathStr = this.get_path_string(user);
 
@@ -67,8 +63,6 @@ export class CollectionAggregateState<
 
     const collectionRef = this.get_collection_from_path(pathStr);
     this.queryRef = firestoreQuery(collectionRef);
-
-    return this.queryRef;
   }
 
   protected async fetch_data(): Promise<void> {

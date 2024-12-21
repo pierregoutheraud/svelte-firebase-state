@@ -46,7 +46,7 @@ export class FirestoreState<
   protected readonly dataState: WritableState<State | null | undefined>;
 
   protected unsub: Unsubscribe | undefined;
-  protected initRefPromise: Promise<unknown> | undefined;
+  protected initPromise: Promise<unknown> | undefined;
 
   public loading = $state(false);
 
@@ -88,7 +88,7 @@ export class FirestoreState<
     };
 
     this.getUserPromise = get_firebase_user(this.auth);
-    this.initRefPromise = this.init_ref();
+    this.initPromise = this.init();
   }
 
   get_path_string(user: User | null): string | null {
@@ -101,7 +101,7 @@ export class FirestoreState<
   }
 
   async start(): Promise<void> {
-    await this.initRefPromise;
+    await this.initPromise;
 
     if (this.listen) {
       this.listen_data();
@@ -126,7 +126,7 @@ export class FirestoreState<
 
   protected async fetch_data(): Promise<void> {}
 
-  protected async init_ref(): Promise<unknown> {
+  protected async init(): Promise<void> {
     return;
   }
 
